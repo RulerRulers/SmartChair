@@ -1,0 +1,420 @@
+C51 COMPILER V9.50a   TOF10120                                                             10/27/2019 16:14:30 PAGE 1   
+
+
+C51 COMPILER V9.50a, COMPILATION OF MODULE TOF10120
+OBJECT MODULE PLACED IN tof10120.obj
+COMPILER INVOKED BY: D:\KeilC51\C51\BIN\C51.EXE driver\tof10120.c BROWSE INCDIR(.\driver) DEBUG OBJECTEXTEND PRINT(.\tof
+                    -10120.lst) TABS(2) OBJECT(tof10120.obj)
+
+line level    source
+
+   1          #include <string.h>
+   2          #include <STC12C5A60S2.H>
+   3          #include <intrins.h>
+   4          #include "TOF10120.h"
+   5          #include "stdio.h"
+   6          
+   7          
+   8          sbit IIC_SCL = P2^0;
+   9          sbit IIC_SDA = P2^1;
+  10          
+  11          sbit IIC_SCL1 = P2^2;
+  12          sbit IIC_SDA1 = P2^3;
+  13          
+  14          unsigned char channel = 1;
+  15          
+  16          static void Delay1us()//@12.000MHz
+  17          {
+  18   1        _nop_();
+  19   1        _nop_();
+  20   1      }
+  21          
+  22          static void Delay1ms()    //@12.000MHz
+  23          {
+  24   1        unsigned char i, j;
+  25   1      
+  26   1        _nop_();
+  27   1        _nop_();
+  28   1        i = 12;
+  29   1        j = 168;
+  30   1        do
+  31   1        {
+  32   2          while (--j);
+  33   2        } while (--i);
+  34   1      }
+  35          
+  36          static void delay_us(unsigned int nus)
+  37          {
+  38   1        while(nus--)
+  39   1        {
+  40   2          Delay1us();
+  41   2        }
+  42   1      }
+  43          
+  44          
+  45          
+  46          static void delay_ms(unsigned int nms)
+  47          {
+  48   1        while(nms--)
+  49   1        {
+  50   2          Delay1ms();
+  51   2        }
+  52   1      
+  53   1      }
+  54          //Function:初始化IO口
+C51 COMPILER V9.50a   TOF10120                                                             10/27/2019 16:14:30 PAGE 2   
+
+  55          //Description：GPIO初始化为高,通知器件总线空闲
+  56          //Input:无
+  57          //Output:无
+  58          //Return:无
+  59          //Others:无
+  60          void IO_Init()
+  61          {
+  62   1        if(channel == 1)
+  63   1        {
+  64   2          IIC_SCL = 1;
+  65   2          delay_us(5);
+  66   2          IIC_SDA = 1;
+  67   2          delay_us(5);
+  68   2        }
+  69   1        else
+  70   1        {
+  71   2          IIC_SCL1 = 1;
+  72   2          delay_us(5);
+  73   2          IIC_SDA1 = 1;
+  74   2          delay_us(5);
+  75   2        }
+  76   1        
+  77   1      }
+  78          
+  79          //Function:启动IIC传输
+  80          //Description：IIC_SCL为高时,IIC_SDA由高到低
+  81          //Input:无
+  82          //Output:无
+  83          //Return:无
+  84          //Others:无
+  85          static void IIC_Start()
+  86          {
+  87   1        if(channel == 1)
+  88   1        {
+  89   2          IIC_SDA = 1;
+  90   2          IIC_SCL = 1;
+  91   2          delay_us(5);
+  92   2          IIC_SDA = 0;
+  93   2          delay_us(5);
+  94   2          IIC_SCL = 0;
+  95   2        }
+  96   1        else
+  97   1        {
+  98   2          IIC_SDA1 = 1;
+  99   2          IIC_SCL1 = 1;
+ 100   2          delay_us(5);
+ 101   2          IIC_SDA1 = 0;
+ 102   2          delay_us(5);
+ 103   2          IIC_SCL1 = 0;
+ 104   2        }     
+ 105   1        
+ 106   1      }
+ 107          
+ 108          //Function:停止IIC传输
+ 109          //Description：IIC_SCL为高时,IIC_SDA由低到高
+ 110          //Input:无
+ 111          //Output:无
+ 112          //Return:无
+ 113          //Others:无
+ 114          static void IIC_Stop()
+ 115          {
+ 116   1        if(channel == 1)
+C51 COMPILER V9.50a   TOF10120                                                             10/27/2019 16:14:30 PAGE 3   
+
+ 117   1        {
+ 118   2          IIC_SCL = 0;
+ 119   2          IIC_SDA = 0;
+ 120   2          delay_us(5);
+ 121   2          IIC_SCL = 1;
+ 122   2          IIC_SDA = 1;
+ 123   2          delay_us(5);
+ 124   2        }
+ 125   1        else
+ 126   1        {
+ 127   2          IIC_SCL1 = 0;
+ 128   2          IIC_SDA1 = 0;
+ 129   2          delay_us(5);
+ 130   2          IIC_SCL1 = 1;
+ 131   2          IIC_SDA1 = 1;
+ 132   2          delay_us(5);
+ 133   2        }
+ 134   1      }
+ 135          
+ 136          //Function:产生应答信号
+ 137          //Description：IIC_SCL为高时,IIC_SDA被拉低并保持一定时间的低电平
+ 138          //Input:无
+ 139          //Output:无
+ 140          //Return:无
+ 141          //Others:无
+ 142          void IIC_Ack()
+ 143          {
+ 144   1        unsigned char i;
+ 145   1        
+ 146   1        if(channel == 1)
+ 147   1        { 
+ 148   2          IIC_SCL = 1;//在scl为高电平期间等待应答
+ 149   2          delay_ms(2);
+ 150   2          while((IIC_SDA == 1) && i < 250)//若为应答0即退出，从机向主机发送应答信号
+ 151   2            i++;//通过i自增等待一段时间 
+ 152   2          IIC_SCL = 0;//得到应答,拉低时钟
+ 153   2          delay_ms(2);
+ 154   2        }
+ 155   1        else
+ 156   1        {
+ 157   2          IIC_SCL1 = 1;//在scl为高电平期间等待应答
+ 158   2          delay_ms(2);
+ 159   2          while((IIC_SDA1 == 1) && i < 250)//若为应答0即退出，从机向主机发送应答信号
+ 160   2            i++;//通过i自增等待一段时间 
+ 161   2          IIC_SCL1 = 0;//得到应答,拉低时钟
+ 162   2          delay_ms(2);
+ 163   2        }
+ 164   1      }
+ 165          
+ 166          //Function:产生非应答信号
+ 167          //Description：IIC_SCL为高时,IIC_SDA为高
+ 168          //Input:无
+ 169          //Output:无
+ 170          //Return:无
+ 171          //Others:无
+ 172          // void IIC_NAck()
+ 173          // {
+ 174          //  IIC_SCL = 1;
+ 175          //  delay_ms(2);
+ 176          //  IIC_SDA = 1;
+ 177          //  IIC_SCL = 0;
+ 178          //  delay_ms(2);
+C51 COMPILER V9.50a   TOF10120                                                             10/27/2019 16:14:30 PAGE 4   
+
+ 179          // }
+ 180          
+ 181          //Function:I2C写一个字节数据，返回ACK或者NACK
+ 182          //Description：从高位开始依次传输
+ 183          //Input:写的字节
+ 184          //Output:无
+ 185          //Return:无
+ 186          //Others:无
+ 187          void IIC_Write_Byte(unsigned char txd)
+ 188          {
+ 189   1        unsigned char len;
+ 190   1        
+ 191   1        if(channel == 1)
+ 192   1        {
+ 193   2          for (len=0;len<8;len++)
+ 194   2          {
+ 195   3            IIC_SCL = 0;//只有在IIC_SCL为低电平时,才允许IIC_SDA上的数据变化
+ 196   3            delay_us(5); 
+ 197   3            if(txd & 0x80)
+ 198   3              IIC_SDA = 1;
+ 199   3            else
+ 200   3              IIC_SDA = 0;  
+ 201   3            delay_us(5);   
+ 202   3            IIC_SCL = 1;//在IIC_SCL为高电平时,不允许IIC_SDA上的数据变化，使数据稳定
+ 203   3            txd <<= 1;
+ 204   3            delay_us(10); 
+ 205   3            IIC_SCL = 0;  
+ 206   3            delay_us(5);
+ 207   3            }
+ 208   2          IIC_SDA = 1;//释放总线
+ 209   2          IIC_SCL = 1;
+ 210   2          delay_us(5);
+ 211   2        }
+ 212   1        else
+ 213   1        {
+ 214   2          for (len=0;len<8;len++)
+ 215   2          {
+ 216   3            IIC_SCL1 = 0;//只有在IIC_SCL为低电平时,才允许IIC_SDA上的数据变化
+ 217   3            delay_us(5); 
+ 218   3            if(txd & 0x80)
+ 219   3              IIC_SDA1 = 1;
+ 220   3            else
+ 221   3              IIC_SDA1 = 0;  
+ 222   3            delay_us(5);   
+ 223   3            IIC_SCL1 = 1;//在IIC_SCL为高电平时,不允许IIC_SDA上的数据变化，使数据稳定
+ 224   3            txd <<= 1;
+ 225   3            delay_us(10); 
+ 226   3            IIC_SCL1 = 0; 
+ 227   3            delay_us(5);
+ 228   3          }
+ 229   2          IIC_SDA1 = 1;//释放总线
+ 230   2          IIC_SCL1 = 1;
+ 231   2          delay_us(5);
+ 232   2        }
+ 233   1      }
+ 234          
+ 235          //Function:I2C读一个字节数据，返回ACK或者NACK
+ 236          //Description：从高到低,依次接收
+ 237          //Input:是否应答
+ 238          //Output:无
+ 239          //Return:接收的数据
+ 240          //Others:无
+C51 COMPILER V9.50a   TOF10120                                                             10/27/2019 16:14:30 PAGE 5   
+
+ 241          unsigned char IIC_Read_Byte(/*unsigned char ack*/)
+ 242          {
+ 243   1        unsigned char len,dat = 0;
+ 244   1          
+ 245   1        if(channel == 1)
+ 246   1        {
+ 247   2          IIC_SDA = 1;//准备读取数据
+ 248   2          for(len=0;len<8;len++) 
+ 249   2          {
+ 250   3            
+ 251   3            IIC_SCL = 0; 
+ 252   3                delay_us(5);
+ 253   3            IIC_SCL = 1;//不允许IIC_SDA变化
+ 254   3            delay_us(5); 
+ 255   3                dat <<= 1;
+ 256   3                dat |= IIC_SDA; //读数据 
+ 257   3            delay_us(5); 
+ 258   3            IIC_SCL = 0;//允许IIC_SDA变化等待下一位数据的到来
+ 259   3            delay_us(5); 
+ 260   3          }  
+ 261   2        } 
+ 262   1        else
+ 263   1        {
+ 264   2          IIC_SDA1 = 1;//准备读取数据
+ 265   2          for(len=0;len<8;len++) 
+ 266   2          {
+ 267   3            
+ 268   3            IIC_SCL1= 0; 
+ 269   3            delay_us(5);
+ 270   3            IIC_SCL1 = 1;//不允许IIC_SDA变化
+ 271   3            delay_us(5); 
+ 272   3                dat <<= 1;
+ 273   3                dat |= IIC_SDA1; //读数据 
+ 274   3            delay_us(5); 
+ 275   3            IIC_SCL1 = 0;//允许IIC_SDA变化等待下一位数据的到来
+ 276   3            delay_us(5); 
+ 277   3          }  
+ 278   2        }
+ 279   1          
+ 280   1        return dat;
+ 281   1      }
+ 282          
+ 283          /*****************************************以下是TOF10120芯片的读写函数************************************
+             -*************/
+ 284          
+ 285          
+ 286          //Function:初始化AT24C02
+ 287          //Description：IO口属于空闲,准备开始通信
+ 288          //Input:无
+ 289          //Output:无
+ 290          //Return:无
+ 291          //Others:无
+ 292          void TOF_Init(void)
+ 293          {
+ 294   1        IO_Init();
+ 295   1      }
+ 296          
+ 297          //Function:写一个字节
+ 298          //Description：向AT24C02的任意地址写入一个字节数据
+ 299          //Input:写入的地址和数据
+ 300          //Output:无
+ 301          //Return:无
+C51 COMPILER V9.50a   TOF10120                                                             10/27/2019 16:14:30 PAGE 6   
+
+ 302          //Others:无
+ 303          void TOF_Write_Byte(unsigned char addr,unsigned char dat)
+ 304          {
+ 305   1        IIC_Start();  //启动
+ 306   1        IIC_Write_Byte(0xA4); //发送从设备地址
+ 307   1        IIC_Ack();  //等待从设备的响应
+ 308   1        IIC_Write_Byte(addr); //发出芯片内地址
+ 309   1        IIC_Ack();  //等待从设备的响应
+ 310   1        
+ 311   1        delay_us(30); 
+ 312   1        
+ 313   1        IIC_Write_Byte(dat);  //发送数据
+ 314   1        IIC_Ack();  //等待从设备的响应
+ 315   1        IIC_Stop(); //停止
+ 316   1        delay_ms(10);  // 写入周期
+ 317   1      }
+ 318          
+ 319          //Function:指定地址读一个字节
+ 320          //Description：向AT24C02的指定地址读出一个字节数据
+ 321          //Input:读地址
+ 322          //Output:无
+ 323          //Return:读到的数据
+ 324          //Others:无
+ 325          unsigned char TOF_Read_Byte(unsigned char addr)
+ 326          {
+ 327   1        unsigned char dat;
+ 328   1        
+ 329   1        IIC_Start();
+ 330   1        IIC_Write_Byte(0xA4);//发送发送从设备地址 写操作
+ 331   1        IIC_Ack();
+ 332   1        IIC_Write_Byte(addr);//发送芯片内地址
+ 333   1        IIC_Ack();
+ 334   1        delay_us(30); 
+ 335   1        IIC_Start();
+ 336   1        IIC_Write_Byte(0xA5);//发送发送从设备地址 读操作
+ 337   1        IIC_Ack();
+ 338   1        dat = IIC_Read_Byte();//获取数据
+ 339   1        IIC_Stop();
+ 340   1        
+ 341   1        return dat;
+ 342   1      }
+ 343          
+ 344          unsigned int GetDistance(unsigned char ch)
+ 345          {
+ 346   1        unsigned int Distance = 0;
+ 347   1        if(ch == 0)
+ 348   1        {
+ 349   2          channel = 1;
+ 350   2          Distance = TOF_Read_Byte(0x04);
+ 351   2          Distance *=256; 
+ 352   2          Distance +=TOF_Read_Byte(0x05); 
+ 353   2        
+ 354   2        }
+ 355   1        else if(ch == 1)
+ 356   1        {  
+ 357   2          channel = 2;
+ 358   2          Distance = TOF_Read_Byte(0x04);
+ 359   2          Distance *=256; 
+ 360   2          Distance +=TOF_Read_Byte(0x05); 
+ 361   2        }
+ 362   1        return  Distance;
+ 363   1      }
+C51 COMPILER V9.50a   TOF10120                                                             10/27/2019 16:14:30 PAGE 7   
+
+ 364          
+ 365          
+ 366          unsigned int DistanDiffer(unsigned int x,unsigned int y)
+ 367          {
+ 368   1        unsigned int max,min,result;
+ 369   1        if (x > y)
+ 370   1        {
+ 371   2          max = x;
+ 372   2          min=y;
+ 373   2        }
+ 374   1        else
+ 375   1        {   
+ 376   2          max = y;
+ 377   2          min = x;
+ 378   2        }
+ 379   1        result = (max - min);
+ 380   1        if(result == 0) result = 1;
+ 381   1        return result;
+ 382   1      }
+ 383          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    578    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

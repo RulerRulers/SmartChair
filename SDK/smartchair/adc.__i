@@ -1,0 +1,1 @@
+"driver\adc.c" BROWSE INCDIR(.\driver) DEBUG OBJECTEXTEND PRINT(.\adc.lst) TABS (2) OBJECT(adc.obj)

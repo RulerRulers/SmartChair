@@ -1,0 +1,12 @@
+"oled.obj",
+"adc.obj",
+"uart.obj",
+"main.obj",
+"key.obj",
+"e2prom.obj",
+"tof10120.obj",
+"timer.obj",
+"menu.obj",
+"Menufun.obj" 
+TO "smartchair" 
+RAMSIZE(256) 
