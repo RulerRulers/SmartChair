@@ -389,6 +389,16 @@
               <FileType>1</FileType>
               <FilePath>.\driver\timer.c</FilePath>
             </File>
+            <File>
+              <FileName>menu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\driver\menu.c</FilePath>
+            </File>
+            <File>
+              <FileName>Menufun.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\driver\Menufun.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

@@ -13,7 +13,7 @@ extern unsigned char KeyFuncIndex ,LastIndex;
 extern unsigned int CurrentPress ;//实际压力差值
 extern unsigned int CurrrntDistan ;//实际距离差值
 
-sbit voice = P2^4;//语音控制  高电平触发下即可
+sbit voice = P3^0;//语音控制  低电平触发
 unsigned int jiuzuo_count =0;//久坐持续时间计数器
 unsigned char  qishen_count= 0;//起身次数 计数器
 
@@ -31,7 +31,16 @@ static void Delay1ms()		//@12.000MHz
 		while (--j);
 	} while (--i);
 }
-
+  static void Delay1s()		//@12.000MHz
+{
+	unsigned int i, j;
+	i = 50;
+	j = 168;
+	do
+	{
+		while (--j);
+	} while (--i);
+}
 static void delay(unsigned int z)
 {
 	while(z--)
@@ -78,21 +87,22 @@ void MainWin()//主界面
 		 Distan1=GetDistance(0);
 		 Distan2=GetDistance(1);//获取 测距值
 		 Distan_difference = DistanDiffer(Distan1,Distan2);//计算距离差值
-		 if(Distan_difference> myparam.DistanceValue) //距离超过阈值 驼背
+		 if(Distan_difference> myparam.DistanceValue&&(GetADCResult(0)>10) && (GetADCResult(1)>10)) //距离超过阈值 驼背	且有人坐
 		 {
 			 tuobei_switch = 1;//打开驼背持续时间计数开关 开始累计驼背时间
 			 if(T_500ms > 10)//驼背时间超过 5s 语音提醒
 			 {
-        voice = 1;
-        Delay1ms();
-			  voice = 0;//语音提示
+		        voice = 0;
+		        Delay1s();
+			    voice = 1;//语音提示
 				tuobei_switch = 0;
 				T_500ms = 0;
 			 }
      }
      else//没有持续5s以上超过驼背阈值
 		 {
-         tuobei_switch = 0;
+			 
+	         tuobei_switch = 0;
 				 T_500ms = 0;
      }     
 		 
@@ -109,8 +119,8 @@ void MainWin()//主界面
         
 			  if((adc_result < 10) && (adc_result1 < 10))//起身标志
 				{
-            qishen_count++;//起身时间计数  500ms一次
-            if(qishen_count > 6) 	//起身超过 3s
+			            qishen_count++;//起身时间计数  500ms一次
+			            if(qishen_count > 6) 	//起身超过 3s
 						{
 							jiuzuo_count = 0;//人起身  久坐计数器清0  				
 							qishen_count = 0; 
@@ -125,26 +135,29 @@ void MainWin()//主界面
             zuowai_switch = 1;//打开坐歪计数开关
 					  if(zuowai_count > 3)//坐歪超过7s
 						{
-               voice = 1;
-               Delay1ms();
-			         voice = 0;//语音提示
+			         		voice = 0;//语音提示
+							Delay1s();
+			    			voice = 1;//语音提示
 							 zuowai_count = 0;
 							 zuowai_switch = 0;
             }
         }
 				else//没有坐歪  关闭坐歪计数开关
 				{
-           zuowai_count = 0;
+				//	voice = 1;
+          			 zuowai_count = 0;
 					 zuowai_switch = 0;
-        }
+        		}
 			  if(jiuzuo_count > 4800)//久坐 超过 40min 
 				{
-             voice = 1;
-             Delay1ms();
+//             voice = 1;
+//             Delay1ms();
 			       voice = 0;//语音提示
+				   Delay1s();
+			    voice = 1;//语音提示
 					   jiuzuo_count = 0;//久坐计数器清0  				
 						 qishen_count = 0; 
-        }			
+        		}			
 				T_500ms_flag = 0;//开启下一次计数
      }	 
 	   oled_show_num(80,2,Distan_difference,0);//显示当前距离差值	 		

@@ -33,6 +33,16 @@ static void Delay1ms()		//@12.000MHz
 	} while (--i);
 }
 
+static void Delay1s()		//@12.000MHz
+{
+	unsigned int i, j;
+	i = 12000;
+	j = 168;
+	do
+	{
+		while (--j);
+	} while (--i);
+}
 static void delay(unsigned int z)
 {
 	while(z--)

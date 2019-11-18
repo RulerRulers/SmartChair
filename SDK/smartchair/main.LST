@@ -1,9 +1,9 @@
-C51 COMPILER V9.50a   MAIN                                                                 10/27/2019 16:07:51 PAGE 1   
+C51 COMPILER V9.00   MAIN                                                                  11/02/2019 16:53:26 PAGE 1   
 
 
-C51 COMPILER V9.50a, COMPILATION OF MODULE MAIN
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
 OBJECT MODULE PLACED IN main.OBJ
-COMPILER INVOKED BY: D:\KeilC51\C51\BIN\C51.EXE main.c BROWSE INCDIR(.\driver) DEBUG OBJECTEXTEND TABS(2)
+COMPILER INVOKED BY: C:\Keil_v4\C51\BIN\C51.EXE main.c BROWSE INCDIR(.\driver) DEBUG OBJECTEXTEND
 
 line level    source
 
@@ -34,18 +34,18 @@ line level    source
   25          
   26          void main()
   27          {
-  28   1        UartInit();//9600bps@12MHz
-  29   1        OLED_Init();//OLED初始化
-  30   1        InitADC();//ADC初始化
-  31   1        TOF_Init();//测距模块初始化
-  32   1        Timer0Init();//50毫秒@12.000MHz
-  33   1        TOF_Write_Byte(0x09,1);//关闭串口自动发送
-  34   1        
-  35   1        MyParamInit(&myparam);//初始化并读取参数
-  36   1          
-  37   1        while(1)
-  38   1        {
-  39   2          MenuTask();
+  28   1              UartInit();//9600bps@12MHz
+  29   1              OLED_Init();//OLED初始化
+  30   1              InitADC();//ADC初始化
+  31   1              TOF_Init();//测距模块初始化
+  32   1              Timer0Init();//50毫秒@12.000MHz
+  33   1              TOF_Write_Byte(0x09,1);//关闭串口自动发送
+  34   1              
+  35   1              MyParamInit(&myparam);//初始化并读取参数
+  36   1                      
+  37   1              while(1)
+  38   1              {
+  39   2                      MenuTask();
   40   2        }
   41   1      }
   42          
@@ -55,35 +55,35 @@ line level    source
   46   1      
   47   1        unsigned char Key_Value=0;
   48   1        while(1)
-  49   1        {
+  49   1              {
   50   2          Key_Value = GetKey();//按键读取
-  51   2          switch (Key_Value)
-  52   2          {
+  51   2                switch (Key_Value)
+  52   2                      {
   53   3            case  LEFT : //左键按下 
-  54   3              KeyFuncIndex = Key[KeyFuncIndex].KeyLeftState;break;
-  55   3            case  RIGHT://右键按下
-C51 COMPILER V9.50a   MAIN                                                                 10/27/2019 16:07:51 PAGE 2   
+  54   3                                      KeyFuncIndex = Key[KeyFuncIndex].KeyLeftState;break;
+  55   3                              case  RIGHT://右键按下
+C51 COMPILER V9.00   MAIN                                                                  11/02/2019 16:53:26 PAGE 2   
 
-  56   3              KeyFuncIndex = Key[KeyFuncIndex].KeyRightState;break;
+  56   3                                      KeyFuncIndex = Key[KeyFuncIndex].KeyRightState;break;
   57   3            case  KEY_RETURN : //返回键键按下 
-  58   3              KeyFuncIndex = Key[KeyFuncIndex].KeyBackState;break;
-  59   3            case  KEY_ENTER://确认键按下
-  60   3              KeyFuncIndex = Key[KeyFuncIndex].KeyEntertState;break; 
-  61   3            default:break; 
+  58   3                                      KeyFuncIndex = Key[KeyFuncIndex].KeyBackState;break;
+  59   3                              case  KEY_ENTER://确认键按下
+  60   3                                      KeyFuncIndex = Key[KeyFuncIndex].KeyEntertState;break; 
+  61   3                              default:break; 
   62   3          }
-  63   2          if(KeyFuncIndex != LastIndex)
-  64   2          {
-  65   3            KeyFuncPtr = Key[KeyFuncIndex].CurrentOperate;
-  66   3            LastIndex  = KeyFuncIndex;
-  67   3            (*KeyFuncPtr)();//运行app
-  68   3          }
-  69   2          else if(KeyFuncIndex ==0 &&(KeyFuncIndex==LastIndex))
-  70   2          {
+  63   2                      if(KeyFuncIndex != LastIndex)
+  64   2                      {
+  65   3                              KeyFuncPtr = Key[KeyFuncIndex].CurrentOperate;
+  66   3                              LastIndex  = KeyFuncIndex;
+  67   3                              (*KeyFuncPtr)();//运行app
+  68   3                      }
+  69   2                      else if(KeyFuncIndex ==0 &&(KeyFuncIndex==LastIndex))
+  70   2                      {
   71   3            KeyFuncPtr = Key[KeyFuncIndex].CurrentOperate;
-  72   3            LastIndex  = KeyFuncIndex;
-  73   3            (*KeyFuncPtr)();//运行app
+  72   3                              LastIndex  = KeyFuncIndex;
+  73   3                              (*KeyFuncPtr)();//运行app
   74   3            
-  75   3          }   
+  75   3                      }               
   76   2        }
   77   1      }
   78          

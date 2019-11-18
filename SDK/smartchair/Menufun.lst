@@ -1,10 +1,10 @@
-C51 COMPILER V9.50a   MENUFUN                                                              10/27/2019 20:09:22 PAGE 1   
+C51 COMPILER V9.00   MENUFUN                                                               11/02/2019 17:24:27 PAGE 1   
 
 
-C51 COMPILER V9.50a, COMPILATION OF MODULE MENUFUN
+C51 COMPILER V9.00, COMPILATION OF MODULE MENUFUN
 OBJECT MODULE PLACED IN Menufun.obj
-COMPILER INVOKED BY: D:\KeilC51\C51\BIN\C51.EXE driver\Menufun.c BROWSE INCDIR(.\driver) DEBUG OBJECTEXTEND PRINT(.\Menu
-                    -fun.lst) TABS(2) OBJECT(Menufun.obj)
+COMPILER INVOKED BY: C:\Keil_v4\C51\BIN\C51.EXE driver\Menufun.c BROWSE INCDIR(.\driver) DEBUG OBJECTEXTEND PRINT(.\Menu
+                    -fun.lst) OBJECT(Menufun.obj)
 
 line level    source
 
@@ -23,7 +23,7 @@ line level    source
   13          extern unsigned int CurrentPress ;//实际压力差值
   14          extern unsigned int CurrrntDistan ;//实际距离差值
   15          
-  16          sbit voice = P2^4;//语音控制  高电平触发下即可
+  16          sbit voice = P3^0;//语音控制  低电平触发
   17          unsigned int jiuzuo_count =0;//久坐持续时间计数器
   18          unsigned char  qishen_count= 0;//起身次数 计数器
   19          
@@ -31,359 +31,373 @@ line level    source
   21          
   22          
   23          
-  24          static void Delay1ms()    //@12.000MHz
+  24          static void Delay1ms()          //@12.000MHz
   25          {
-  26   1        unsigned char i, j;
-  27   1        i = 12;
-  28   1        j = 168;
-  29   1        do
-  30   1        {
-  31   2          while (--j);
-  32   2        } while (--i);
+  26   1              unsigned char i, j;
+  27   1              i = 12;
+  28   1              j = 168;
+  29   1              do
+  30   1              {
+  31   2                      while (--j);
+  32   2              } while (--i);
   33   1      }
-  34          
-  35          static void delay(unsigned int z)
-  36          {
-  37   1        while(z--)
-  38   1        {
-  39   2          Delay1ms();
-  40   2        }
-  41   1      }
-  42          
-  43          unsigned char key_scan_task()
-  44          {
-  45   1           unsigned char Key_Value=0;
-  46   1           Key_Value = GetKey();//按键读取
-  47   1          if((Key_Value == KEY_ENTER))//进入设置
-  48   1          { 
-  49   2               KeyFuncIndex = 1;
-  50   2               LastIndex = 0;//进入设置界面
-  51   2               return  1;    
-  52   2          }
-  53   1          return 0;   
-  54   1      }
-C51 COMPILER V9.50a   MENUFUN                                                              10/27/2019 20:09:22 PAGE 2   
+  34            static void Delay1s()         //@12.000MHz
+  35          {
+  36   1              unsigned int i, j;
+  37   1              i = 50;
+  38   1              j = 168;
+  39   1              do
+  40   1              {
+  41   2                      while (--j);
+  42   2              } while (--i);
+  43   1      }
+  44          static void delay(unsigned int z)
+  45          {
+  46   1              while(z--)
+  47   1              {
+  48   2          Delay1ms();
+  49   2        }
+  50   1      }
+  51          
+  52          unsigned char key_scan_task()
+  53          {
+  54   1                 unsigned char Key_Value=0;
+C51 COMPILER V9.00   MENUFUN                                                               11/02/2019 17:24:27 PAGE 2   
 
-  55          
-  56          
-  57          
-  58          void MainWin()//主界面
-  59          {
-  60   1        
-  61   1         unsigned int Distan1,Distan2,Distan_difference;
-  62   1        
-  63   1         OLED_Fill(0x00); //初始清屏
-  64   1           
-  65   1         OLED_P8x16Str(0,0,"Press:");  //压力 阈值  实际插值
-  66   1         OLED_P8x16Str(0,2,"Distan:"); //距离 阈值  实际差值
-  67   1         OLED_P8x16Str(0,4,"I2C:");  // 
-  68   1         OLED_P8x16Str(0,6,"ADC:"); 
-  69   1        
-  70   1         GetParam(&myparam);//读取阈值参数
-  71   1         oled_show_num(40,0,myparam.PressureValue,1);//显示压力阈值
-  72   1         oled_show_num(40,2,myparam.DistanceValue,0);//显示距离阈值
-  73   1            
-  74   1         while(1)
-  75   1         {
-  76   2           if(key_scan_task()) return;// 退出当前页面 进入设置 
-  77   2            
-  78   2           Distan1=GetDistance(0);
-  79   2           Distan2=GetDistance(1);//获取 测距值
-  80   2           Distan_difference = DistanDiffer(Distan1,Distan2);//计算距离差值
-  81   2           if(Distan_difference> myparam.DistanceValue) //距离超过阈值 驼背
-  82   2           {
-  83   3             tuobei_switch = 1;//打开驼背持续时间计数开关 开始累计驼背时间
-  84   3             if(T_500ms > 10)//驼背时间超过 5s 语音提醒
-  85   3             {
-  86   4              voice = 1;
-  87   4              Delay1ms();
-  88   4              voice = 0;//语音提示
-  89   4              tuobei_switch = 0;
-  90   4              T_500ms = 0;
-  91   4             }
-  92   3           }
-  93   2           else//没有持续5s以上超过驼背阈值
-  94   2           {
-  95   3               tuobei_switch = 0;
-  96   3               T_500ms = 0;
-  97   3           }     
-  98   2           
-  99   2           if(T_500ms_flag == 1)//ADC 采集完成   500ms 执行一次
- 100   2           { 
- 101   3              jiuzuo_count++; //久坐时间计数器
- 102   3              adc_result = GetADCResult(0);
- 103   3              adc_result1 = GetADCResult(1); 
- 104   3              oled_show_num(30,6, adc_result,0);  //ADC1  
- 105   3              oled_show_num(80,6,adc_result1,0);  //ADC2       
- 106   3              CurrentPress = DistanDiffer(adc_result,adc_result1);//计算压力差值
- 107   3              //CurrentPress =(CurrentPress*100)/(adc_result+adc_result1);
- 108   3              oled_show_num(80,0,CurrentPress,1);//显示当前压力差值
- 109   3              
- 110   3              if((adc_result < 10) && (adc_result1 < 10))//起身标志
- 111   3              {
- 112   4                  qishen_count++;//起身时间计数  500ms一次
- 113   4                  if(qishen_count > 6)  //起身超过 3s
- 114   4                  {
- 115   5                    jiuzuo_count = 0;//人起身  久坐计数器清0          
- 116   5                    qishen_count = 0; 
-C51 COMPILER V9.50a   MENUFUN                                                              10/27/2019 20:09:22 PAGE 3   
+  55   1           Key_Value = GetKey();//按键读取
+  56   1                if((Key_Value == KEY_ENTER))//进入设置
+  57   1          { 
+  58   2                                       KeyFuncIndex = 1;
+  59   2                                       LastIndex = 0;//进入设置界面
+  60   2                                       return  1;      
+  61   2          }
+  62   1          return 0;           
+  63   1      }
+  64          
+  65          
+  66          
+  67          void MainWin()//主界面
+  68          {
+  69   1              
+  70   1               unsigned int Distan1,Distan2,Distan_difference;
+  71   1              
+  72   1         OLED_Fill(0x00); //初始清屏
+  73   1                 
+  74   1               OLED_P8x16Str(0,0,"Press:");  //压力 阈值  实际插值
+  75   1               OLED_P8x16Str(0,2,"Distan:"); //距离 阈值  实际差值
+  76   1         OLED_P8x16Str(0,4,"I2C:");  // 
+  77   1               OLED_P8x16Str(0,6,"ADC:"); 
+  78   1              
+  79   1               GetParam(&myparam);//读取阈值参数
+  80   1               oled_show_num(40,0,myparam.PressureValue,1);//显示压力阈值
+  81   1               oled_show_num(40,2,myparam.DistanceValue,0);//显示距离阈值
+  82   1                      
+  83   1               while(1)
+  84   1               {
+  85   2           if(key_scan_task()) return;// 退出当前页面 进入设置 
+  86   2                        
+  87   2                       Distan1=GetDistance(0);
+  88   2                       Distan2=GetDistance(1);//获取 测距值
+  89   2                       Distan_difference = DistanDiffer(Distan1,Distan2);//计算距离差值
+  90   2                       if(Distan_difference> myparam.DistanceValue&&(GetADCResult(0)>10) && (GetADCResult(1)>10)) //距离超过阈
+             -值 驼背        且有人坐
+  91   2                       {
+  92   3                               tuobei_switch = 1;//打开驼背持续时间计数开关 开始累计驼背时间
+  93   3                               if(T_500ms > 10)//驼背时间超过 5s 语音提醒
+  94   3                               {
+  95   4                              voice = 0;
+  96   4                              Delay1s();
+  97   4                                  voice = 1;//语音提示
+  98   4                                      tuobei_switch = 0;
+  99   4                                      T_500ms = 0;
+ 100   4                               }
+ 101   3           }
+ 102   2           else//没有持续5s以上超过驼背阈值
+ 103   2                       {
+ 104   3                               
+ 105   3                       tuobei_switch = 0;
+ 106   3                                       T_500ms = 0;
+ 107   3           }     
+ 108   2                       
+ 109   2                       if(T_500ms_flag == 1)//ADC 采集完成   500ms 执行一次
+ 110   2                       { 
+ 111   3                                jiuzuo_count++; //久坐时间计数器
+ 112   3                                adc_result = GetADCResult(0);
+ 113   3              adc_result1 = GetADCResult(1); 
+ 114   3                                oled_show_num(30,6, adc_result,0);    //ADC1  
+ 115   3                                oled_show_num(80,6,adc_result1,0);    //ADC2                   
+C51 COMPILER V9.00   MENUFUN                                                               11/02/2019 17:24:27 PAGE 3   
 
- 117   5                  }
- 118   4              }
- 119   3              else
- 120   3              {
- 121   4                  qishen_count = 0;//不满足 起身条件  起身计数器清0  
- 122   4              }
- 123   3              if(CurrentPress> myparam.PressureValue)//超过 压力阈值 开启坐歪计数器
- 124   3              {
- 125   4                  zuowai_switch = 1;//打开坐歪计数开关
- 126   4                  if(zuowai_count > 3)//坐歪超过7s
- 127   4                  {
- 128   5                     voice = 1;
- 129   5                     Delay1ms();
- 130   5                     voice = 0;//语音提示
- 131   5                     zuowai_count = 0;
- 132   5                     zuowai_switch = 0;
- 133   5                  }
- 134   4              }
- 135   3              else//没有坐歪  关闭坐歪计数开关
- 136   3              {
- 137   4                 zuowai_count = 0;
- 138   4                 zuowai_switch = 0;
- 139   4              }
- 140   3              if(jiuzuo_count > 4800)//久坐 超过 40min 
- 141   3              {
- 142   4                   voice = 1;
- 143   4                   Delay1ms();
- 144   4                   voice = 0;//语音提示
- 145   4                   jiuzuo_count = 0;//久坐计数器清0         
- 146   4                   qishen_count = 0; 
- 147   4              }     
- 148   3              T_500ms_flag = 0;//开启下一次计数
- 149   3           }   
- 150   2           oled_show_num(80,2,Distan_difference,0);//显示当前距离差值     
- 151   2           oled_show_num(30,4,Distan1,0); //测距1  实际值
- 152   2           oled_show_num(80,4,Distan2,0); //测距2  实际值 
- 153   2         }
- 154   1      }
- 155          
- 156          void pressureMenu()
- 157          {
- 158   1         unsigned char Key_Value=0;
- 159   1         unsigned char line = 1;// 初始化选择第一行反白
- 160   1        
- 161   1         OLED_Fill(0x00); //初始清屏  
- 162   1        
- 163   1         OLED_P8x16Str_t(0,0,"1.SetPressLimit"); //反白第一行 
- 164   1         OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
- 165   1         
- 166   1         OLED_P8x16Str(0,6,"enter"); 
- 167   1         OLED_P8x16Str(100,6,"esc"); 
- 168   1         
- 169   1         while(1)
- 170   1         {
- 171   2            Key_Value = GetKey();//获取按键
- 172   2            if(Key_Value == LEFT)
- 173   2            {
- 174   3               OLED_ClearLine(1);
- 175   3               OLED_P8x16Str(0,0,"1.SetPressLimit"); 
- 176   3               OLED_P8x16Str_t(0,2,"2.SetDistanLimit"); 
- 177   3               
- 178   3               OLED_P8x16Str(0,6,"enter"); 
-C51 COMPILER V9.50a   MENUFUN                                                              10/27/2019 20:09:22 PAGE 4   
+ 116   3                                CurrentPress = DistanDiffer(adc_result,adc_result1);//计算压力差值
+ 117   3                                //CurrentPress =(CurrentPress*100)/(adc_result+adc_result1);
+ 118   3                                oled_show_num(80,0,CurrentPress,1);//显示当前压力差值
+ 119   3              
+ 120   3                                if((adc_result < 10) && (adc_result1 < 10))//起身标志
+ 121   3                                      {
+ 122   4                                          qishen_count++;//起身时间计数  500ms一次
+ 123   4                                          if(qishen_count > 6)        //起身超过 3s
+ 124   4                                                      {
+ 125   5                                                              jiuzuo_count = 0;//人起身  久坐计数器清0                                
+ 126   5                                                              qishen_count = 0; 
+ 127   5                                                      }
+ 128   4              }
+ 129   3                                      else
+ 130   3                                      {
+ 131   4                  qishen_count = 0;//不满足 起身条件  起身计数器清0  
+ 132   4              }
+ 133   3              if(CurrentPress> myparam.PressureValue)//超过 压力阈值 开启坐歪计数器
+ 134   3                                      {
+ 135   4                  zuowai_switch = 1;//打开坐歪计数开关
+ 136   4                                                if(zuowai_count > 3)//坐歪超过7s
+ 137   4                                                      {
+ 138   5                                                      voice = 0;//语音提示
+ 139   5                                                              Delay1s();
+ 140   5                                                      voice = 1;//语音提示
+ 141   5                                                               zuowai_count = 0;
+ 142   5                                                               zuowai_switch = 0;
+ 143   5                  }
+ 144   4              }
+ 145   3                                      else//没有坐歪  关闭坐歪计数开关
+ 146   3                                      {
+ 147   4                                      //      voice = 1;
+ 148   4                                       zuowai_count = 0;
+ 149   4                                               zuowai_switch = 0;
+ 150   4                              }
+ 151   3                                if(jiuzuo_count > 4800)//久坐 超过 40min 
+ 152   3                                      {
+ 153   4      //             voice = 1;
+ 154   4      //             Delay1ms();
+ 155   4                                     voice = 0;//语音提示
+ 156   4                                         Delay1s();
+ 157   4                                  voice = 1;//语音提示
+ 158   4                                                 jiuzuo_count = 0;//久坐计数器清0                             
+ 159   4                                                       qishen_count = 0; 
+ 160   4                              }                       
+ 161   3                                      T_500ms_flag = 0;//开启下一次计数
+ 162   3           }   
+ 163   2                 oled_show_num(80,2,Distan_difference,0);//显示当前距离差值                   
+ 164   2           oled_show_num(30,4,Distan1,0);     //测距1  实际值
+ 165   2                       oled_show_num(80,4,Distan2,0); //测距2  实际值 
+ 166   2         }
+ 167   1      }
+ 168          
+ 169          void pressureMenu()
+ 170          {
+ 171   1               unsigned char Key_Value=0;
+ 172   1               unsigned char line = 1;// 初始化选择第一行反白
+ 173   1              
+ 174   1         OLED_Fill(0x00); //初始清屏  
+ 175   1              
+ 176   1               OLED_P8x16Str_t(0,0,"1.SetPressLimit"); //反白第一行 
+ 177   1               OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
+C51 COMPILER V9.00   MENUFUN                                                               11/02/2019 17:24:27 PAGE 4   
 
- 179   3               OLED_P8x16Str(100,6,"esc"); 
- 180   3               line = 2;
- 181   3            } 
- 182   2            else if(Key_Value == RIGHT) 
- 183   2            {
- 184   3               OLED_ClearLine(2);
- 185   3               OLED_P8x16Str_t(0,0,"1.SetPressLimit"); 
- 186   3               OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
- 187   3               
- 188   3               OLED_P8x16Str(0,6,"enter"); 
- 189   3               OLED_P8x16Str(100,6,"esc"); 
- 190   3                
- 191   3               line = 1;        
- 192   3            } 
- 193   2            else if(Key_Value == KEY_RETURN)//返回主菜单  
- 194   2            {
- 195   3                 KeyFuncIndex = 0;
- 196   3                 LastIndex = 0;
- 197   3                 return;  
- 198   3            }       
- 199   2            
- 200   2            else if(Key_Value == KEY_ENTER) 
- 201   2            {
- 202   3               if(line == 1)//调整压力阈值
- 203   3               {
- 204   4                 KeyFuncIndex = 3;
- 205   4                 LastIndex = 0;
- 206   4                 return;  
- 207   4      
- 208   4               }
- 209   3               else 
- 210   3               {
- 211   4                 KeyFuncIndex = 4;
- 212   4                 LastIndex = 0;
- 213   4                 return;  
- 214   4               }
- 215   3            }
- 216   2           
- 217   2         }
- 218   1      }
- 219          
- 220          void DistanceMenu()
- 221          {
- 222   1      
- 223   1        
- 224   1      }
- 225          void ChangePressure()//设置 压力阈值
- 226          {
- 227   1         unsigned char Key_Value=0;
- 228   1        
- 229   1         OLED_Fill(0x00); //初始清屏  
- 230   1        
- 231   1         OLED_P8x16Str(40,0,"Setting");//设置  
- 232   1        
- 233   1         OLED_P8x16Str(0,2,"Pressure:");  
- 234   1         GetParam(&myparam);
- 235   1         oled_show_num(80,2,myparam.PressureValue,1);
- 236   1         
- 237   1         OLED_P8x16Str(0,6,"ok"); 
- 238   1         OLED_P8x16Str(100,6,"esc"); 
- 239   1        
- 240   1         while(1)
-C51 COMPILER V9.50a   MENUFUN                                                              10/27/2019 20:09:22 PAGE 5   
+ 178   1               
+ 179   1               OLED_P8x16Str(0,6,"enter"); 
+ 180   1               OLED_P8x16Str(100,6,"esc"); 
+ 181   1               
+ 182   1               while(1)
+ 183   1               {
+ 184   2                        Key_Value = GetKey();//获取按键
+ 185   2                        if(Key_Value == LEFT)
+ 186   2                              {
+ 187   3                                       OLED_ClearLine(1);
+ 188   3                                       OLED_P8x16Str(0,0,"1.SetPressLimit"); 
+ 189   3                                       OLED_P8x16Str_t(0,2,"2.SetDistanLimit"); 
+ 190   3                                       
+ 191   3                                       OLED_P8x16Str(0,6,"enter"); 
+ 192   3                                       OLED_P8x16Str(100,6,"esc"); 
+ 193   3                                       line = 2;
+ 194   3            } 
+ 195   2            else if(Key_Value == RIGHT)       
+ 196   2            {
+ 197   3               OLED_ClearLine(2);
+ 198   3                                       OLED_P8x16Str_t(0,0,"1.SetPressLimit"); 
+ 199   3                                       OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
+ 200   3                                       
+ 201   3                                       OLED_P8x16Str(0,6,"enter"); 
+ 202   3                                       OLED_P8x16Str(100,6,"esc"); 
+ 203   3                
+ 204   3               line = 1;                              
+ 205   3            } 
+ 206   2            else if(Key_Value == KEY_RETURN)//返回主菜单      
+ 207   2            {
+ 208   3                 KeyFuncIndex = 0;
+ 209   3                                               LastIndex = 0;
+ 210   3                                               return;        
+ 211   3            }                         
+ 212   2                        
+ 213   2                              else if(Key_Value == KEY_ENTER) 
+ 214   2                              {
+ 215   3               if(line == 1)//调整压力阈值
+ 216   3                                       {
+ 217   4                 KeyFuncIndex = 3;
+ 218   4                                               LastIndex = 0;
+ 219   4                                               return;        
+ 220   4      
+ 221   4               }
+ 222   3               else 
+ 223   3                                       {
+ 224   4                 KeyFuncIndex = 4;
+ 225   4                                               LastIndex = 0;
+ 226   4                                               return;        
+ 227   4               }
+ 228   3            }
+ 229   2                       
+ 230   2         }
+ 231   1      }
+ 232          
+ 233          void DistanceMenu()
+ 234          {
+ 235   1      
+ 236   1              
+ 237   1      }
+ 238          void ChangePressure()//设置 压力阈值
+ 239          {
+C51 COMPILER V9.00   MENUFUN                                                               11/02/2019 17:24:27 PAGE 5   
 
- 241   1         {
- 242   2            Key_Value = GetKey();//获取按键
- 243   2            if(Key_Value == LEFT)
- 244   2            {
- 245   3               myparam.PressureValue+=5;
- 246   3               if(myparam.PressureValue > 70) myparam.PressureValue = 10;     
- 247   3               OLED_ClearLine(2);//清掉旧值
- 248   3               OLED_P8x16Str(0,2,"Pressure:");  
- 249   3               oled_show_num(80,2,myparam.PressureValue,1);//显示新值
- 250   3                  
- 251   3               OLED_P8x16Str(0,6,"ok"); 
- 252   3               OLED_P8x16Str(100,6,"esc"); 
- 253   3            } 
- 254   2            else if(Key_Value == RIGHT) 
- 255   2            {
- 256   3               myparam.PressureValue-=5;
- 257   3               if(myparam.PressureValue < 10) myparam.PressureValue = 70;     
- 258   3               OLED_ClearLine(2);//清掉旧值
- 259   3               OLED_P8x16Str(0,2,"Pressure:");  
- 260   3               oled_show_num(80,2,myparam.PressureValue,1);//显示新值
- 261   3               
- 262   3               OLED_P8x16Str(0,6,"ok"); 
- 263   3               OLED_P8x16Str(100,6,"esc");    
- 264   3            } 
- 265   2            else if(Key_Value == KEY_RETURN)//返回设置选择界面
- 266   2            {
- 267   3                 KeyFuncIndex = 1;
- 268   3                 LastIndex = 0;
- 269   3                 return;  
- 270   3            }       
- 271   2            
- 272   2            else if(Key_Value == KEY_ENTER) 
- 273   2            {
- 274   3       
- 275   3                 SetParam(&myparam);//保存参数
- 276   3              
- 277   3                 OLED_Fill(0x00); //初始清屏  
- 278   3        
- 279   3                 OLED_P8x16Str(40,0,"Save OK!");//保存成功  
- 280   3                   
- 281   3                 delay(500);//延时500ms 
- 282   3                        
- 283   3                 KeyFuncIndex = 0;
- 284   3                 LastIndex = 0;
- 285   3                 return;//返回主菜单         
- 286   3            }
- 287   2        
- 288   2          }
- 289   1      }
- 290          void ChangeDistance()//改变距离阈值
- 291          {
- 292   1         unsigned char Key_Value=0;
- 293   1        
- 294   1         OLED_Fill(0x00); //初始清屏  
- 295   1        
- 296   1         OLED_P8x16Str(40,0,"Setting");//设置  
- 297   1        
- 298   1         OLED_P8x16Str(0,2,"Distance:");  
- 299   1         GetParam(&myparam);
- 300   1         oled_show_num(80,2,myparam.DistanceValue,0);//显示距离阈值
- 301   1         
- 302   1         OLED_P8x16Str(0,6,"ok"); 
-C51 COMPILER V9.50a   MENUFUN                                                              10/27/2019 20:09:22 PAGE 6   
+ 240   1         unsigned char Key_Value=0;
+ 241   1              
+ 242   1         OLED_Fill(0x00); //初始清屏  
+ 243   1              
+ 244   1               OLED_P8x16Str(40,0,"Setting");//设置  
+ 245   1              
+ 246   1               OLED_P8x16Str(0,2,"Pressure:");  
+ 247   1               GetParam(&myparam);
+ 248   1               oled_show_num(80,2,myparam.PressureValue,1);
+ 249   1               
+ 250   1               OLED_P8x16Str(0,6,"ok"); 
+ 251   1               OLED_P8x16Str(100,6,"esc"); 
+ 252   1              
+ 253   1               while(1)
+ 254   1               {
+ 255   2                        Key_Value = GetKey();//获取按键
+ 256   2                        if(Key_Value == LEFT)
+ 257   2                              {
+ 258   3                                       myparam.PressureValue+=5;
+ 259   3                                       if(myparam.PressureValue > 70) myparam.PressureValue = 10;                     
+ 260   3                                       OLED_ClearLine(2);//清掉旧值
+ 261   3                                       OLED_P8x16Str(0,2,"Pressure:");  
+ 262   3                                       oled_show_num(80,2,myparam.PressureValue,1);//显示新值
+ 263   3                                                      
+ 264   3                                       OLED_P8x16Str(0,6,"ok"); 
+ 265   3                                       OLED_P8x16Str(100,6,"esc"); 
+ 266   3            } 
+ 267   2            else if(Key_Value == RIGHT)       
+ 268   2            {
+ 269   3                                       myparam.PressureValue-=5;
+ 270   3                                       if(myparam.PressureValue < 10) myparam.PressureValue = 70;                     
+ 271   3                                       OLED_ClearLine(2);//清掉旧值
+ 272   3                                       OLED_P8x16Str(0,2,"Pressure:");  
+ 273   3                                       oled_show_num(80,2,myparam.PressureValue,1);//显示新值
+ 274   3                                       
+ 275   3                                       OLED_P8x16Str(0,6,"ok"); 
+ 276   3                                       OLED_P8x16Str(100,6,"esc");            
+ 277   3            } 
+ 278   2            else if(Key_Value == KEY_RETURN)//返回设置选择界面
+ 279   2            {
+ 280   3                 KeyFuncIndex = 1;
+ 281   3                                               LastIndex = 0;
+ 282   3                                               return;        
+ 283   3            }                         
+ 284   2                        
+ 285   2                              else if(Key_Value == KEY_ENTER) 
+ 286   2                              {
+ 287   3       
+ 288   3                                         SetParam(&myparam);//保存参数
+ 289   3                                      
+ 290   3                                         OLED_Fill(0x00); //初始清屏  
+ 291   3              
+ 292   3                       OLED_P8x16Str(40,0,"Save OK!");//保存成功  
+ 293   3                                                 
+ 294   3                 delay(500);//延时500ms 
+ 295   3                                              
+ 296   3                 KeyFuncIndex = 0;
+ 297   3                                               LastIndex = 0;
+ 298   3                                               return;//返回主菜单           
+ 299   3            }
+ 300   2              
+ 301   2                      }
+C51 COMPILER V9.00   MENUFUN                                                               11/02/2019 17:24:27 PAGE 6   
 
- 303   1         OLED_P8x16Str(100,6,"esc"); 
- 304   1        
- 305   1         while(1)
- 306   1         {
- 307   2            Key_Value = GetKey();//获取按键
- 308   2            if(Key_Value == LEFT)
- 309   2            {
- 310   3               myparam.DistanceValue++;
- 311   3               if(myparam.DistanceValue > 12) myparam.DistanceValue = 3;      
- 312   3               OLED_ClearLine(2);//清掉旧值
- 313   3               OLED_P8x16Str(0,2,"Distance:");  
- 314   3               oled_show_num(80,2,myparam.DistanceValue,0);//显示新值 不带%号
- 315   3                  
- 316   3               OLED_P8x16Str(0,6,"ok"); 
- 317   3               OLED_P8x16Str(100,6,"esc"); 
- 318   3            } 
- 319   2            else if(Key_Value == RIGHT) 
- 320   2            {
- 321   3               myparam.DistanceValue--;
- 322   3               if(myparam.DistanceValue < 1) myparam.DistanceValue = 12;      
- 323   3               OLED_ClearLine(2);//清掉旧值
- 324   3               OLED_P8x16Str(0,2,"Distance:");  
- 325   3               oled_show_num(80,2,myparam.DistanceValue,0);//显示新值
- 326   3               
- 327   3               OLED_P8x16Str(0,6,"ok"); 
- 328   3               OLED_P8x16Str(100,6,"esc");    
- 329   3            } 
- 330   2            else if(Key_Value == KEY_RETURN)//返回设置选择界面
- 331   2            {
- 332   3                 KeyFuncIndex = 1;
- 333   3                 LastIndex = 0;
- 334   3                 return;  
- 335   3            }       
- 336   2            
- 337   2            else if(Key_Value == KEY_ENTER) 
- 338   2            {
- 339   3       
- 340   3                 SetParam(&myparam);//保存参数
- 341   3              
- 342   3                 OLED_Fill(0x00); //初始清屏  
- 343   3        
- 344   3                 OLED_P8x16Str(40,0,"Save OK!");//保存成功  
- 345   3                   
- 346   3                 delay(500);//延时500ms 
- 347   3                        
- 348   3                 KeyFuncIndex = 0;
- 349   3                 LastIndex = 0;
- 350   3                 return;//返回主菜单         
- 351   3            }
- 352   2        
- 353   2          }
- 354   1      }
+ 302   1      }
+ 303          void ChangeDistance()//改变距离阈值
+ 304          {
+ 305   1         unsigned char Key_Value=0;
+ 306   1              
+ 307   1         OLED_Fill(0x00); //初始清屏  
+ 308   1              
+ 309   1               OLED_P8x16Str(40,0,"Setting");//设置  
+ 310   1              
+ 311   1               OLED_P8x16Str(0,2,"Distance:");  
+ 312   1               GetParam(&myparam);
+ 313   1               oled_show_num(80,2,myparam.DistanceValue,0);//显示距离阈值
+ 314   1               
+ 315   1               OLED_P8x16Str(0,6,"ok"); 
+ 316   1               OLED_P8x16Str(100,6,"esc"); 
+ 317   1              
+ 318   1               while(1)
+ 319   1               {
+ 320   2                        Key_Value = GetKey();//获取按键
+ 321   2                        if(Key_Value == LEFT)
+ 322   2                              {
+ 323   3                                       myparam.DistanceValue++;
+ 324   3                                       if(myparam.DistanceValue > 12) myparam.DistanceValue = 3;                      
+ 325   3                                       OLED_ClearLine(2);//清掉旧值
+ 326   3                                       OLED_P8x16Str(0,2,"Distance:");  
+ 327   3                                       oled_show_num(80,2,myparam.DistanceValue,0);//显示新值 不带%号
+ 328   3                                                      
+ 329   3                                       OLED_P8x16Str(0,6,"ok"); 
+ 330   3                                       OLED_P8x16Str(100,6,"esc"); 
+ 331   3            } 
+ 332   2            else if(Key_Value == RIGHT)       
+ 333   2            {
+ 334   3                                       myparam.DistanceValue--;
+ 335   3                                       if(myparam.DistanceValue < 1) myparam.DistanceValue = 12;                      
+ 336   3                                       OLED_ClearLine(2);//清掉旧值
+ 337   3                                       OLED_P8x16Str(0,2,"Distance:");  
+ 338   3                                       oled_show_num(80,2,myparam.DistanceValue,0);//显示新值
+ 339   3                                       
+ 340   3                                       OLED_P8x16Str(0,6,"ok"); 
+ 341   3                                       OLED_P8x16Str(100,6,"esc");            
+ 342   3            } 
+ 343   2            else if(Key_Value == KEY_RETURN)//返回设置选择界面
+ 344   2            {
+ 345   3                 KeyFuncIndex = 1;
+ 346   3                                               LastIndex = 0;
+ 347   3                                               return;        
+ 348   3            }                         
+ 349   2                        
+ 350   2                              else if(Key_Value == KEY_ENTER) 
+ 351   2                              {
+ 352   3       
+ 353   3                                         SetParam(&myparam);//保存参数
+ 354   3                                      
+ 355   3                                         OLED_Fill(0x00); //初始清屏  
+ 356   3              
+ 357   3                       OLED_P8x16Str(40,0,"Save OK!");//保存成功  
+ 358   3                                                 
+ 359   3                 delay(500);//延时500ms 
+ 360   3                                              
+ 361   3                 KeyFuncIndex = 0;
+ 362   3                                               LastIndex = 0;
+ 363   3                                               return;//返回主菜单           
+C51 COMPILER V9.00   MENUFUN                                                               11/02/2019 17:24:27 PAGE 7   
+
+ 364   3            }
+ 365   2              
+ 366   2                      }
+ 367   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1203    ----
+   CODE SIZE        =   1258    ----
    CONSTANT SIZE    =    108    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =      3      10
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
-C51 COMPILER V9.50a   MENUFUN                                                              10/27/2019 20:09:22 PAGE 7   
-
 END OF MODULE INFORMATION.
 
 
