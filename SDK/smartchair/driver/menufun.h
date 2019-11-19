@@ -5,8 +5,8 @@ void pressureMenu();
 void DistanceMenu();
 void ChangePressure();
 void ChangeDistance();
-
-
+void DisDiffMenu();
+void changeDisDiff();
 #endif
 
 

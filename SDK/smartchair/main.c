@@ -70,8 +70,7 @@ void MenuTask(void)
 		{
       KeyFuncPtr = Key[KeyFuncIndex].CurrentOperate;
 			LastIndex  = KeyFuncIndex;
-			(*KeyFuncPtr)();//运行app
-      
+			(*KeyFuncPtr)();//运行app  
 		}		
   }
 }

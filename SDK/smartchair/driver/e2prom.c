@@ -158,14 +158,16 @@ void IapEraseSector(unsigned int addr)
 void GetParam(parameterTypedef *param)
 {
    param->PressureValue = IapReadByte(paramADDRESS);//压力阈值10%
-	 param->DistanceValue =IapReadByte(paramADDRESS+1);//距离阈值 3cm	    
+	 param->DistanceValue =IapReadByte(paramADDRESS+1);//距离阈值 3cm	   
+   param->DistanceDiffLimit =IapReadByte(paramADDRESS+2);//距离差 阈值	 	
 }
 
 void SetParam(parameterTypedef *param)
 {
 	IapEraseSector(10);    //Erase current secto 
   IapWriteByte(paramADDRESS, param->PressureValue);
-	IapWriteByte(paramADDRESS+1, param->DistanceValue);	 
+	IapWriteByte(paramADDRESS+1, param->DistanceValue);
+	IapWriteByte(paramADDRESS+2, param->DistanceDiffLimit);
 }
 
 
@@ -178,6 +180,7 @@ void MyParamInit(parameterTypedef *param)
      IapWriteByte(600,0x5A);
      param->PressureValue = 10;//压力阈值10%
 		 param->DistanceValue =3;//距离阈值 3cm	   
+		 param->DistanceDiffLimit = 50;
 		 SetParam(param);//设置参数
 		 //TOF_Serial_Write(100,(unsigned char*)param,sizeof(param));
 	 }

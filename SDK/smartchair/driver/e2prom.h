@@ -15,7 +15,8 @@
 typedef struct parameter
 {
   unsigned char PressureValue;//Ñ¹Á¦ãÐÖµ
-  unsigned char DistanceValue;//¾àÀëãÐÖµ  
+  unsigned char DistanceValue;//¾àÀëãÐÖµ
+  unsigned char DistanceDiffLimit;//¾àÀë²îµÄ ãÐÖµ  
 }parameterTypedef;
 extern parameterTypedef myparam;
 
