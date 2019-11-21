@@ -69,6 +69,32 @@ unsigned char key_scan_task()
 				 LastIndex = 0;//进入设置界面
 				 return  1; 	 
     }
+		else if(Key_Value == KEY_RETURN)
+		{
+       OLED_Fill(0x00); //初始清屏
+	     OLED_P8x16Str(0,0,"DistanDiff:");  //上下两个传感器差值的阈值
+			 //OLED_P8x16Str(0,6,"enter"); 
+	     OLED_P8x16Str(100,6,"esc"); 
+       GetParam(&myparam);//读取阈值参数
+	     oled_show_num(90,0,myparam.DistanceDiffLimit,0);
+       while(1)
+			 {
+         Key_Value = GetKey();//获取按键 
+         if(Key_Value == KEY_RETURN)//返回主菜单	
+				 {		 
+					     OLED_Fill(0x00); //初始清屏 
+							 OLED_P8x16Str(0,0,"Press:");  //压力 阈值  实际插值
+							 OLED_P8x16Str(0,2,"Distan:"); //距离 阈值  实际差值
+							 OLED_P8x16Str(0,4,"I2C:");  // 
+							 OLED_P8x16Str(0,6,"ADC:"); 						
+							 GetParam(&myparam);//读取阈值参数
+							 oled_show_num(40,0,myparam.PressureValue,1);//显示压力阈值
+							 oled_show_num(40,2,myparam.DistanceValue,0);//显示距离阈值			 
+							 return 0;	
+				 }				
+       }				 
+    }
+		
     return 0;		
 }
 
@@ -76,6 +102,7 @@ void MainWin()//主界面
 {
 	
 	 unsigned int Distan1,Distan2,Distan_difference;
+	 unsigned char press1,press2;
 	
    OLED_Fill(0x00); //初始清屏
 	   
@@ -94,24 +121,31 @@ void MainWin()//主界面
 		  
 		 Distan1=GetDistance(0);
 		 Distan2=GetDistance(1);//获取 测距值
+		 
+		 press1 = GetADCResult(0);
+		 press2 = GetADCResult(1);//获取压力值  判断是否有人坐
+		 
 		 Distan_difference = DistanDiffer(Distan1,Distan2);//计算距离差值
 		 
-		 if(Distan_difference> myparam.DistanceValue&&((GetADCResult(0)+GetADCResult(1))>10)) //距离超过阈值 驼背	且有人坐  (GetADCResult(0)>10) && (GetADCResult(1)>10)
+		 if(Distan_difference> myparam.DistanceValue&&((press1+press2)>10)) //距离超过阈值 驼背	且有人坐 
 		 {
 			 tuobei_switch = 1;//打开驼背持续时间计数开关 开始累计驼背时间
 			 if(T_500ms > 10)//驼背时间超过 5s 语音提醒
 			 {
-// 		    voice = 0;
-// 		    Delay1s();
-// 			  voice = 1;//语音提示
 				Beep(20);//蜂鸣器频率 25HZ
 				tuobei_switch = 0;
 				T_500ms = 0;
 			 }
      }
-		 else if((Distan2 > Distan1) && ((Distan2 - Distan1) > myparam.DistanceDiffLimit)&& ((GetADCResult(0)+GetADCResult(1))>10) )//上面传感器-下面传感器 > 阈值 报警
+		 else if((Distan2 > Distan1) && ((Distan2 - Distan1) > myparam.DistanceDiffLimit)&& ((press1+press2)>10) )//上面传感器-下面传感器 > 阈值 报警
 		 {
-        Beep(20);//蜂鸣器频率 25HZ
+       tuobei_switch = 1;//打开驼背持续时间计数开关 开始累计驼背时间
+			 if(T_500ms > 10)//驼背时间超过 5s 语音提醒
+			 {
+				Beep(20);//蜂鸣器频率 25HZ
+				tuobei_switch = 0;
+				T_500ms = 0;
+			 }
      }
      else//没有持续5s以上超过驼背阈值
 		 {	 
@@ -210,7 +244,7 @@ void pressureMenu()
 					 OLED_P8x16Str(100,6,"esc"); 
 					 line = 2;
 				}
-				else if(line == 2)//当前是第一行  需要刷新第二行 反白第三行
+				else if(line == 2)//当前是第二行  需要刷新第二行 反白第三行
 				{
 					 OLED_ClearLine(2);
 					 OLED_P8x16Str(0,0,"1.SetPressLimit"); 
@@ -236,9 +270,9 @@ void pressureMenu()
           
          line = 2; 				
 				}
-				if(line == 2)//刷新第二行 反白第一行
+				else if(line == 2)//刷新第二行 反白第一行
 				{
-          OLED_ClearLine(3);
+          OLED_ClearLine(2);
 				  OLED_P8x16Str_t(0,0,"1.SetPressLimit"); 
 				  OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
 				  OLED_P8x16Str(0,4,"3.SetDisdifLimit"); 

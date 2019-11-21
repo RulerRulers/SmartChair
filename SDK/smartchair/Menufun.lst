@@ -1,4 +1,4 @@
-C51 COMPILER V9.50a   MENUFUN                                                              11/19/2019 23:22:03 PAGE 1   
+C51 COMPILER V9.50a   MENUFUN                                                              11/21/2019 19:48:17 PAGE 1   
 
 
 C51 COMPILER V9.50a, COMPILATION OF MODULE MENUFUN
@@ -62,7 +62,7 @@ line level    source
   52   1        unsigned char n = 10;
   53   1        for(;n>0;n--)
   54   1        {
-C51 COMPILER V9.50a   MENUFUN                                                              11/19/2019 23:22:03 PAGE 2   
+C51 COMPILER V9.50a   MENUFUN                                                              11/21/2019 19:48:17 PAGE 2   
 
   55   2           voice = 0;
   56   2           delay(T);
@@ -81,448 +81,481 @@ line level    source
   69   2               LastIndex = 0;//Ω¯»Î…Ë÷√ΩÁ√Ê
   70   2               return  1;    
   71   2          }
-  72   1          return 0;   
-  73   1      }
-  74          
-  75          void MainWin()//÷˜ΩÁ√Ê
-  76          {
-  77   1        
-  78   1         unsigned int Distan1,Distan2,Distan_difference;
-  79   1        
-  80   1         OLED_Fill(0x00); //≥ı º«Â∆¡
-  81   1           
-  82   1         OLED_P8x16Str(0,0,"Press:");  //—π¡¶ „–÷µ   µº ≤Â÷µ
-  83   1         OLED_P8x16Str(0,2,"Distan:"); //æ‡¿Î „–÷µ   µº ≤Ó÷µ
-  84   1         OLED_P8x16Str(0,4,"I2C:");  // 
-  85   1         OLED_P8x16Str(0,6,"ADC:"); 
-  86   1        
-  87   1         GetParam(&myparam);//∂¡»°„–÷µ≤Œ ˝
-  88   1         oled_show_num(40,0,myparam.PressureValue,1);//œ‘ æ—π¡¶„–÷µ
-  89   1         oled_show_num(40,2,myparam.DistanceValue,0);//œ‘ ææ‡¿Î„–÷µ
-  90   1            
-  91   1         while(1)
-  92   1         {
-  93   2           if(key_scan_task()) return;// ÕÀ≥ˆµ±«∞“≥√Ê Ω¯»Î…Ë÷√ΩÁ√Ê
-  94   2            
-  95   2           Distan1=GetDistance(0);
-  96   2           Distan2=GetDistance(1);//ªÒ»° ≤‚æ‡÷µ
-  97   2           Distan_difference = DistanDiffer(Distan1,Distan2);//º∆À„æ‡¿Î≤Ó÷µ
-  98   2           
-  99   2           if(Distan_difference> myparam.DistanceValue&&((GetADCResult(0)+GetADCResult(1))>10)) //æ‡¿Î≥¨π˝„–÷µ Õ’±
-             -≥  «“”–»À◊¯  (GetADCResult(0)>10) && (GetADCResult(1)>10)
- 100   2           {
- 101   3             tuobei_switch = 1;//¥Úø™Õ’±≥≥÷–¯ ±º‰º∆ ˝ø™πÿ ø™ º¿€º∆Õ’±≥ ±º‰
- 102   3             if(T_500ms > 10)//Õ’±≥ ±º‰≥¨π˝ 5s ”Ô“ÙÃ·–—
- 103   3             {
- 104   4      //        voice = 0;
- 105   4      //        Delay1s();
- 106   4      //        voice = 1;//”Ô“ÙÃ· æ
- 107   4              Beep(20);//∑‰√˘∆˜∆µ¬  25HZ
- 108   4              tuobei_switch = 0;
- 109   4              T_500ms = 0;
- 110   4             }
- 111   3           }
- 112   2           else if((Distan2 > Distan1) && ((Distan2 - Distan1) > myparam.DistanceDiffLimit)&& ((GetADCResult(0)+Ge
-             -tADCResult(1))>10) )//…œ√Ê¥´∏–∆˜-œ¬√Ê¥´∏–∆˜ > „–÷µ ±®æØ
- 113   2           {
- 114   3              Beep(20);//∑‰√˘∆˜∆µ¬  25HZ
-C51 COMPILER V9.50a   MENUFUN                                                              11/19/2019 23:22:03 PAGE 3   
+  72   1          else if(Key_Value == KEY_RETURN)
+  73   1          {
+  74   2             OLED_Fill(0x00); //≥ı º«Â∆¡
+  75   2             OLED_P8x16Str(0,0,"DistanDiff:");  //…œœ¬¡Ω∏ˆ¥´∏–∆˜≤Ó÷µµƒ„–÷µ
+  76   2             //OLED_P8x16Str(0,6,"enter"); 
+  77   2             OLED_P8x16Str(100,6,"esc"); 
+  78   2             GetParam(&myparam);//∂¡»°„–÷µ≤Œ ˝
+  79   2             oled_show_num(90,0,myparam.DistanceDiffLimit,0);
+  80   2             while(1)
+  81   2             {
+  82   3               Key_Value = GetKey();//ªÒ»°∞¥º¸ 
+  83   3               if(Key_Value == KEY_RETURN)//∑µªÿ÷˜≤Àµ•  
+  84   3               {     
+  85   4                     OLED_Fill(0x00); //≥ı º«Â∆¡ 
+  86   4                     OLED_P8x16Str(0,0,"Press:");  //—π¡¶ „–÷µ   µº ≤Â÷µ
+  87   4                     OLED_P8x16Str(0,2,"Distan:"); //æ‡¿Î „–÷µ   µº ≤Ó÷µ
+  88   4                     OLED_P8x16Str(0,4,"I2C:");  // 
+  89   4                     OLED_P8x16Str(0,6,"ADC:");             
+  90   4                     GetParam(&myparam);//∂¡»°„–÷µ≤Œ ˝
+  91   4                     oled_show_num(40,0,myparam.PressureValue,1);//œ‘ æ—π¡¶„–÷µ
+  92   4                     oled_show_num(40,2,myparam.DistanceValue,0);//œ‘ ææ‡¿Î„–÷µ      
+  93   4                     return 0;  
+  94   4               }        
+  95   3             }         
+  96   2          }
+  97   1          
+  98   1          return 0;   
+  99   1      }
+ 100          
+ 101          void MainWin()//÷˜ΩÁ√Ê
+ 102          {
+ 103   1        
+ 104   1         unsigned int Distan1,Distan2,Distan_difference;
+ 105   1         unsigned char press1,press2;
+ 106   1        
+ 107   1         OLED_Fill(0x00); //≥ı º«Â∆¡
+ 108   1           
+ 109   1         OLED_P8x16Str(0,0,"Press:");  //—π¡¶ „–÷µ   µº ≤Â÷µ
+ 110   1         OLED_P8x16Str(0,2,"Distan:"); //æ‡¿Î „–÷µ   µº ≤Ó÷µ
+ 111   1         OLED_P8x16Str(0,4,"I2C:");  // 
+ 112   1         OLED_P8x16Str(0,6,"ADC:"); 
+ 113   1        
+ 114   1         GetParam(&myparam);//∂¡»°„–÷µ≤Œ ˝
+ 115   1         oled_show_num(40,0,myparam.PressureValue,1);//œ‘ æ—π¡¶„–÷µ
+ 116   1         oled_show_num(40,2,myparam.DistanceValue,0);//œ‘ ææ‡¿Î„–÷µ
+C51 COMPILER V9.50a   MENUFUN                                                              11/21/2019 19:48:17 PAGE 3   
 
- 115   3           }
- 116   2           else//√ª”–≥÷–¯5s“‘…œ≥¨π˝Õ’±≥„–÷µ
- 117   2           {   
- 118   3               tuobei_switch = 0;
- 119   3               T_500ms = 0;
- 120   3           }     
- 121   2           
- 122   2           if(T_500ms_flag == 1)//ADC ≤…ºØÕÍ≥…   500ms ÷¥––“ª¥Œ
- 123   2           { 
- 124   3              jiuzuo_count++; //æ√◊¯ ±º‰º∆ ˝∆˜
- 125   3              adc_result = GetADCResult(0);
- 126   3              adc_result1 = GetADCResult(1); 
- 127   3              oled_show_num(30,6, adc_result,0);  //ADC1  
- 128   3              oled_show_num(80,6,adc_result1,0);  //ADC2       
- 129   3              CurrentPress = DistanDiffer(adc_result,adc_result1);//º∆À„—π¡¶≤Ó÷µ
- 130   3              //CurrentPress =(CurrentPress*100)/(adc_result+adc_result1);
- 131   3              oled_show_num(80,0,CurrentPress,1);//œ‘ æµ±«∞—π¡¶≤Ó÷µ
- 132   3              
- 133   3              if((adc_result < 10) && (adc_result1 < 10))//∆…Ì±Í÷æ
- 134   3              {
- 135   4                  qishen_count++;//∆…Ì ±º‰º∆ ˝  500ms“ª¥Œ
- 136   4                  if(qishen_count > 40)   //∆…Ì≥¨π˝ 20s ≤≈À„∆…Ì
- 137   4                  {
- 138   5                    jiuzuo_count = 0;//»À∆…Ì  æ√◊¯º∆ ˝∆˜«Â0          
- 139   5                    qishen_count = 0; 
- 140   5                  }
- 141   4              }
- 142   3              else
- 143   3              {
- 144   4                  qishen_count = 0;//≤ª¬˙◊„ ∆…ÌÃıº˛  ∆…Ìº∆ ˝∆˜«Â0  
- 145   4              }
- 146   3              if(CurrentPress> myparam.PressureValue)//≥¨π˝ —π¡¶„–÷µ ø™∆Ù◊¯Õ·º∆ ˝∆˜
- 147   3              {
- 148   4                  zuowai_switch = 1;//¥Úø™◊¯Õ·º∆ ˝ø™πÿ
- 149   4                  if(zuowai_count > 3)//◊¯Õ·≥¨π˝7s
- 150   4                  {
- 151   5      //               voice = 0;//”Ô“ÙÃ· æ
- 152   5      //               Delay1s();
- 153   5      //               voice = 1;//”Ô“ÙÃ· æ
- 154   5                     Beep(100);//∑‰√˘∆˜∆µ¬  5HZ
- 155   5                     zuowai_count = 0;
- 156   5                     zuowai_switch = 0;
- 157   5                  }
- 158   4              }
- 159   3              else//√ª”–◊¯Õ·  πÿ±’◊¯Õ·º∆ ˝ø™πÿ
- 160   3              {
- 161   4                  //  voice = 1;
- 162   4                     zuowai_count = 0;
- 163   4                     zuowai_switch = 0;
- 164   4              }
- 165   3              if(jiuzuo_count > 120)//æ√◊¯ ≥¨π˝ 1min 
- 166   3              {
- 167   4      //             voice = 1;
- 168   4      //             Delay1ms();
- 169   4                   voice = 0;//”Ô“ÙÃ· æ
- 170   4                   Delay1s();
- 171   4                   voice = 1;//”Ô“ÙÃ· æ
- 172   4                   jiuzuo_count = 0;//æ√◊¯º∆ ˝∆˜«Â0         
- 173   4                   qishen_count = 0; 
- 174   4              }     
- 175   3              T_500ms_flag = 0;//ø™∆Ùœ¬“ª¥Œº∆ ˝
- 176   3           }   
-C51 COMPILER V9.50a   MENUFUN                                                              11/19/2019 23:22:03 PAGE 4   
+ 117   1            
+ 118   1         while(1)
+ 119   1         {
+ 120   2           if(key_scan_task()) return;// ÕÀ≥ˆµ±«∞“≥√Ê Ω¯»Î…Ë÷√ΩÁ√Ê
+ 121   2            
+ 122   2           Distan1=GetDistance(0);
+ 123   2           Distan2=GetDistance(1);//ªÒ»° ≤‚æ‡÷µ
+ 124   2           
+ 125   2           press1 = GetADCResult(0);
+ 126   2           press2 = GetADCResult(1);//ªÒ»°—π¡¶÷µ  ≈–∂œ «∑Ò”–»À◊¯
+ 127   2           
+ 128   2           Distan_difference = DistanDiffer(Distan1,Distan2);//º∆À„æ‡¿Î≤Ó÷µ
+ 129   2           
+ 130   2           if(Distan_difference> myparam.DistanceValue&&((press1+press2)>10)) //æ‡¿Î≥¨π˝„–÷µ Õ’±≥ «“”–»À◊¯ 
+ 131   2           {
+ 132   3             tuobei_switch = 1;//¥Úø™Õ’±≥≥÷–¯ ±º‰º∆ ˝ø™πÿ ø™ º¿€º∆Õ’±≥ ±º‰
+ 133   3             if(T_500ms > 10)//Õ’±≥ ±º‰≥¨π˝ 5s ”Ô“ÙÃ·–—
+ 134   3             {
+ 135   4              Beep(20);//∑‰√˘∆˜∆µ¬  25HZ
+ 136   4              tuobei_switch = 0;
+ 137   4              T_500ms = 0;
+ 138   4             }
+ 139   3           }
+ 140   2           else if((Distan2 > Distan1) && ((Distan2 - Distan1) > myparam.DistanceDiffLimit)&& ((press1+press2)>10)
+             - )//…œ√Ê¥´∏–∆˜-œ¬√Ê¥´∏–∆˜ > „–÷µ ±®æØ
+ 141   2           {
+ 142   3             tuobei_switch = 1;//¥Úø™Õ’±≥≥÷–¯ ±º‰º∆ ˝ø™πÿ ø™ º¿€º∆Õ’±≥ ±º‰
+ 143   3             if(T_500ms > 10)//Õ’±≥ ±º‰≥¨π˝ 5s ”Ô“ÙÃ·–—
+ 144   3             {
+ 145   4              Beep(20);//∑‰√˘∆˜∆µ¬  25HZ
+ 146   4              tuobei_switch = 0;
+ 147   4              T_500ms = 0;
+ 148   4             }
+ 149   3           }
+ 150   2           else//√ª”–≥÷–¯5s“‘…œ≥¨π˝Õ’±≥„–÷µ
+ 151   2           {   
+ 152   3               tuobei_switch = 0;
+ 153   3               T_500ms = 0;
+ 154   3           }     
+ 155   2           
+ 156   2           if(T_500ms_flag == 1)//ADC ≤…ºØÕÍ≥…   500ms ÷¥––“ª¥Œ
+ 157   2           { 
+ 158   3              jiuzuo_count++; //æ√◊¯ ±º‰º∆ ˝∆˜
+ 159   3              adc_result = GetADCResult(0);
+ 160   3              adc_result1 = GetADCResult(1); 
+ 161   3              oled_show_num(30,6, adc_result,0);  //ADC1  
+ 162   3              oled_show_num(80,6,adc_result1,0);  //ADC2       
+ 163   3              CurrentPress = DistanDiffer(adc_result,adc_result1);//º∆À„—π¡¶≤Ó÷µ
+ 164   3              //CurrentPress =(CurrentPress*100)/(adc_result+adc_result1);
+ 165   3              oled_show_num(80,0,CurrentPress,1);//œ‘ æµ±«∞—π¡¶≤Ó÷µ
+ 166   3              
+ 167   3              if((adc_result < 10) && (adc_result1 < 10))//∆…Ì±Í÷æ
+ 168   3              {
+ 169   4                  qishen_count++;//∆…Ì ±º‰º∆ ˝  500ms“ª¥Œ
+ 170   4                  if(qishen_count > 40)   //∆…Ì≥¨π˝ 20s ≤≈À„∆…Ì
+ 171   4                  {
+ 172   5                    jiuzuo_count = 0;//»À∆…Ì  æ√◊¯º∆ ˝∆˜«Â0          
+ 173   5                    qishen_count = 0; 
+ 174   5                  }
+ 175   4              }
+ 176   3              else
+ 177   3              {
+C51 COMPILER V9.50a   MENUFUN                                                              11/21/2019 19:48:17 PAGE 4   
 
- 177   2           oled_show_num(80,2,Distan_difference,0);//œ‘ æµ±«∞æ‡¿Î≤Ó÷µ     
- 178   2           oled_show_num(30,4,Distan1,0); //≤‚æ‡1   µº ÷µ
- 179   2           oled_show_num(80,4,Distan2,0); //≤‚æ‡2   µº ÷µ 
- 180   2         }
- 181   1      }
- 182          
- 183          void pressureMenu()
- 184          {
- 185   1         unsigned char Key_Value=0;
- 186   1         unsigned char line = 1;// ≥ı ºªØ—°‘Òµ⁄“ª––∑¥∞◊
- 187   1        
- 188   1         OLED_Fill(0x00); //≥ı º«Â∆¡  
- 189   1        
- 190   1         OLED_P8x16Str_t(0,0,"1.SetPressLimit"); //∑¥∞◊µ⁄“ª–– 
- 191   1         OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
- 192   1         OLED_P8x16Str(0,4,"3.SetDisdifLimit"); 
- 193   1         
- 194   1         OLED_P8x16Str(0,6,"enter"); 
- 195   1         OLED_P8x16Str(100,6,"esc"); 
- 196   1         
- 197   1         while(1)
- 198   1         {
- 199   2            Key_Value = GetKey();//ªÒ»°∞¥º¸
- 200   2            if(Key_Value == LEFT)
- 201   2            {
- 202   3              if(line == 1)//µ±«∞ «µ⁄“ª––  –Ë“™À¢–¬µ⁄“ª–– ∑¥∞◊µ⁄∂˛––
- 203   3              {
- 204   4                 OLED_ClearLine(1);
- 205   4                 OLED_P8x16Str(0,0,"1.SetPressLimit"); 
- 206   4                 OLED_P8x16Str_t(0,2,"2.SetDistanLimit"); 
- 207   4                 OLED_P8x16Str(0,4,"3.SetDisdifLimit"); 
- 208   4                
- 209   4                 OLED_P8x16Str(0,6,"enter"); 
- 210   4                 OLED_P8x16Str(100,6,"esc"); 
- 211   4                 line = 2;
- 212   4              }
- 213   3              else if(line == 2)//µ±«∞ «µ⁄“ª––  –Ë“™À¢–¬µ⁄∂˛–– ∑¥∞◊µ⁄»˝––
- 214   3              {
- 215   4                 OLED_ClearLine(2);
- 216   4                 OLED_P8x16Str(0,0,"1.SetPressLimit"); 
- 217   4                 OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
- 218   4                 OLED_P8x16Str_t(0,4,"3.SetDisdifLimit"); 
- 219   4                
- 220   4                 OLED_P8x16Str(0,6,"enter"); 
- 221   4                 OLED_P8x16Str(100,6,"esc"); 
- 222   4                 line = 3;
- 223   4              }
- 224   3            } 
- 225   2            else if(Key_Value == RIGHT) 
- 226   2            {
- 227   3              if(line == 3)
- 228   3              {
- 229   4               OLED_ClearLine(3);
- 230   4               OLED_P8x16Str(0,0,"1.SetPressLimit"); 
- 231   4               OLED_P8x16Str_t(0,2,"2.SetDistanLimit"); 
- 232   4               OLED_P8x16Str(0,4,"3.SetDisdifLimit"); 
- 233   4              
- 234   4               OLED_P8x16Str(0,6,"enter"); 
- 235   4               OLED_P8x16Str(100,6,"esc"); 
- 236   4                
- 237   4               line = 2;        
- 238   4              }
-C51 COMPILER V9.50a   MENUFUN                                                              11/19/2019 23:22:03 PAGE 5   
+ 178   4                  qishen_count = 0;//≤ª¬˙◊„ ∆…ÌÃıº˛  ∆…Ìº∆ ˝∆˜«Â0  
+ 179   4              }
+ 180   3              if(CurrentPress> myparam.PressureValue)//≥¨π˝ —π¡¶„–÷µ ø™∆Ù◊¯Õ·º∆ ˝∆˜
+ 181   3              {
+ 182   4                  zuowai_switch = 1;//¥Úø™◊¯Õ·º∆ ˝ø™πÿ
+ 183   4                  if(zuowai_count > 3)//◊¯Õ·≥¨π˝7s
+ 184   4                  {
+ 185   5      //               voice = 0;//”Ô“ÙÃ· æ
+ 186   5      //               Delay1s();
+ 187   5      //               voice = 1;//”Ô“ÙÃ· æ
+ 188   5                     Beep(100);//∑‰√˘∆˜∆µ¬  5HZ
+ 189   5                     zuowai_count = 0;
+ 190   5                     zuowai_switch = 0;
+ 191   5                  }
+ 192   4              }
+ 193   3              else//√ª”–◊¯Õ·  πÿ±’◊¯Õ·º∆ ˝ø™πÿ
+ 194   3              {
+ 195   4                  //  voice = 1;
+ 196   4                     zuowai_count = 0;
+ 197   4                     zuowai_switch = 0;
+ 198   4              }
+ 199   3              if(jiuzuo_count > 120)//æ√◊¯ ≥¨π˝ 1min 
+ 200   3              {
+ 201   4      //             voice = 1;
+ 202   4      //             Delay1ms();
+ 203   4                   voice = 0;//”Ô“ÙÃ· æ
+ 204   4                   Delay1s();
+ 205   4                   voice = 1;//”Ô“ÙÃ· æ
+ 206   4                   jiuzuo_count = 0;//æ√◊¯º∆ ˝∆˜«Â0         
+ 207   4                   qishen_count = 0; 
+ 208   4              }     
+ 209   3              T_500ms_flag = 0;//ø™∆Ùœ¬“ª¥Œº∆ ˝
+ 210   3           }   
+ 211   2           oled_show_num(80,2,Distan_difference,0);//œ‘ æµ±«∞æ‡¿Î≤Ó÷µ     
+ 212   2           oled_show_num(30,4,Distan1,0); //≤‚æ‡1   µº ÷µ
+ 213   2           oled_show_num(80,4,Distan2,0); //≤‚æ‡2   µº ÷µ 
+ 214   2         }
+ 215   1      }
+ 216          
+ 217          void pressureMenu()
+ 218          {
+ 219   1         unsigned char Key_Value=0;
+ 220   1         unsigned char line = 1;// ≥ı ºªØ—°‘Òµ⁄“ª––∑¥∞◊
+ 221   1        
+ 222   1         OLED_Fill(0x00); //≥ı º«Â∆¡  
+ 223   1        
+ 224   1         OLED_P8x16Str_t(0,0,"1.SetPressLimit"); //∑¥∞◊µ⁄“ª–– 
+ 225   1         OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
+ 226   1         OLED_P8x16Str(0,4,"3.SetDisdifLimit"); 
+ 227   1         
+ 228   1         OLED_P8x16Str(0,6,"enter"); 
+ 229   1         OLED_P8x16Str(100,6,"esc"); 
+ 230   1         
+ 231   1         while(1)
+ 232   1         {
+ 233   2            Key_Value = GetKey();//ªÒ»°∞¥º¸
+ 234   2            if(Key_Value == LEFT)
+ 235   2            {
+ 236   3              if(line == 1)//µ±«∞ «µ⁄“ª––  –Ë“™À¢–¬µ⁄“ª–– ∑¥∞◊µ⁄∂˛––
+ 237   3              {
+ 238   4                 OLED_ClearLine(1);
+ 239   4                 OLED_P8x16Str(0,0,"1.SetPressLimit"); 
+C51 COMPILER V9.50a   MENUFUN                                                              11/21/2019 19:48:17 PAGE 5   
 
- 239   3              if(line == 2)//À¢–¬µ⁄∂˛–– ∑¥∞◊µ⁄“ª––
- 240   3              {
- 241   4                OLED_ClearLine(3);
- 242   4                OLED_P8x16Str_t(0,0,"1.SetPressLimit"); 
- 243   4                OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
- 244   4                OLED_P8x16Str(0,4,"3.SetDisdifLimit"); 
- 245   4              
- 246   4                OLED_P8x16Str(0,6,"enter"); 
- 247   4                OLED_P8x16Str(100,6,"esc"); 
- 248   4                line = 1;    
- 249   4              }
- 250   3            } 
- 251   2            else if(Key_Value == KEY_RETURN)//∑µªÿ÷˜≤Àµ•  
- 252   2            {
- 253   3                 KeyFuncIndex = 0;
- 254   3                 LastIndex = 0;
- 255   3                 return;  
- 256   3            }       
- 257   2            
- 258   2            else if(Key_Value == KEY_ENTER) 
- 259   2            {
- 260   3               if(line == 1)//µ˜’˚—π¡¶„–÷µ
- 261   3               {
- 262   4                 KeyFuncIndex = 4;
- 263   4                 LastIndex = 0;
- 264   4                 return;  
- 265   4               }
- 266   3               else if(line == 2)//µ˜’˚æ‡¿Î„–÷µ
- 267   3               {
- 268   4                 KeyFuncIndex = 5;
- 269   4                 LastIndex = 0;
- 270   4                 return;  
- 271   4               }
- 272   3               else//µ˜’˚æ‡¿Î≤Óµƒ„–÷µ
- 273   3               {
- 274   4                 KeyFuncIndex = 6;
- 275   4                 LastIndex = 0;
- 276   4                 return;  
- 277   4               }
- 278   3            }
- 279   2           
- 280   2         }
- 281   1      }
- 282          
- 283          void DistanceMenu()
- 284          {
- 285   1      
- 286   1        
- 287   1      }
- 288          
- 289          void DisDiffMenu()
- 290          {
- 291   1      
- 292   1      
- 293   1      }
- 294          void ChangePressure()//…Ë÷√ —π¡¶„–÷µ
- 295          {
- 296   1         unsigned char Key_Value=0;
- 297   1        
- 298   1         OLED_Fill(0x00); //≥ı º«Â∆¡  
- 299   1        
- 300   1         OLED_P8x16Str(40,0,"Setting");//…Ë÷√  
-C51 COMPILER V9.50a   MENUFUN                                                              11/19/2019 23:22:03 PAGE 6   
+ 240   4                 OLED_P8x16Str_t(0,2,"2.SetDistanLimit"); 
+ 241   4                 OLED_P8x16Str(0,4,"3.SetDisdifLimit"); 
+ 242   4                
+ 243   4                 OLED_P8x16Str(0,6,"enter"); 
+ 244   4                 OLED_P8x16Str(100,6,"esc"); 
+ 245   4                 line = 2;
+ 246   4              }
+ 247   3              else if(line == 2)//µ±«∞ «µ⁄∂˛––  –Ë“™À¢–¬µ⁄∂˛–– ∑¥∞◊µ⁄»˝––
+ 248   3              {
+ 249   4                 OLED_ClearLine(2);
+ 250   4                 OLED_P8x16Str(0,0,"1.SetPressLimit"); 
+ 251   4                 OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
+ 252   4                 OLED_P8x16Str_t(0,4,"3.SetDisdifLimit"); 
+ 253   4                
+ 254   4                 OLED_P8x16Str(0,6,"enter"); 
+ 255   4                 OLED_P8x16Str(100,6,"esc"); 
+ 256   4                 line = 3;
+ 257   4              }
+ 258   3            } 
+ 259   2            else if(Key_Value == RIGHT) 
+ 260   2            {
+ 261   3              if(line == 3)
+ 262   3              {
+ 263   4               OLED_ClearLine(3);
+ 264   4               OLED_P8x16Str(0,0,"1.SetPressLimit"); 
+ 265   4               OLED_P8x16Str_t(0,2,"2.SetDistanLimit"); 
+ 266   4               OLED_P8x16Str(0,4,"3.SetDisdifLimit"); 
+ 267   4              
+ 268   4               OLED_P8x16Str(0,6,"enter"); 
+ 269   4               OLED_P8x16Str(100,6,"esc"); 
+ 270   4                
+ 271   4               line = 2;        
+ 272   4              }
+ 273   3              else if(line == 2)//À¢–¬µ⁄∂˛–– ∑¥∞◊µ⁄“ª––
+ 274   3              {
+ 275   4                OLED_ClearLine(2);
+ 276   4                OLED_P8x16Str_t(0,0,"1.SetPressLimit"); 
+ 277   4                OLED_P8x16Str(0,2,"2.SetDistanLimit"); 
+ 278   4                OLED_P8x16Str(0,4,"3.SetDisdifLimit"); 
+ 279   4              
+ 280   4                OLED_P8x16Str(0,6,"enter"); 
+ 281   4                OLED_P8x16Str(100,6,"esc"); 
+ 282   4                line = 1;    
+ 283   4              }
+ 284   3            } 
+ 285   2            else if(Key_Value == KEY_RETURN)//∑µªÿ÷˜≤Àµ•  
+ 286   2            {
+ 287   3                 KeyFuncIndex = 0;
+ 288   3                 LastIndex = 0;
+ 289   3                 return;  
+ 290   3            }       
+ 291   2            
+ 292   2            else if(Key_Value == KEY_ENTER) 
+ 293   2            {
+ 294   3               if(line == 1)//µ˜’˚—π¡¶„–÷µ
+ 295   3               {
+ 296   4                 KeyFuncIndex = 4;
+ 297   4                 LastIndex = 0;
+ 298   4                 return;  
+ 299   4               }
+ 300   3               else if(line == 2)//µ˜’˚æ‡¿Î„–÷µ
+ 301   3               {
+C51 COMPILER V9.50a   MENUFUN                                                              11/21/2019 19:48:17 PAGE 6   
 
- 301   1        
- 302   1         OLED_P8x16Str(0,2,"Pressure:");  
- 303   1         GetParam(&myparam);
- 304   1         oled_show_num(80,2,myparam.PressureValue,1);
- 305   1         
- 306   1         OLED_P8x16Str(0,6,"ok"); 
- 307   1         OLED_P8x16Str(100,6,"esc"); 
- 308   1        
- 309   1         while(1)
- 310   1         {
- 311   2            Key_Value = GetKey();//ªÒ»°∞¥º¸
- 312   2            if(Key_Value == LEFT)
- 313   2            {
- 314   3               myparam.PressureValue+=5;
- 315   3               if(myparam.PressureValue > 70) myparam.PressureValue = 10;     
- 316   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
- 317   3               OLED_P8x16Str(0,2,"Pressure:");  
- 318   3               oled_show_num(80,2,myparam.PressureValue,1);//œ‘ æ–¬÷µ
- 319   3                  
- 320   3               OLED_P8x16Str(0,6,"ok"); 
- 321   3               OLED_P8x16Str(100,6,"esc"); 
- 322   3            } 
- 323   2            else if(Key_Value == RIGHT) 
- 324   2            {
- 325   3               myparam.PressureValue-=5;
- 326   3               if(myparam.PressureValue < 10) myparam.PressureValue = 70;     
- 327   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
- 328   3               OLED_P8x16Str(0,2,"Pressure:");  
- 329   3               oled_show_num(80,2,myparam.PressureValue,1);//œ‘ æ–¬÷µ
- 330   3               
- 331   3               OLED_P8x16Str(0,6,"ok"); 
- 332   3               OLED_P8x16Str(100,6,"esc");    
- 333   3            } 
- 334   2            else if(Key_Value == KEY_RETURN)//∑µªÿ…Ë÷√—°‘ÒΩÁ√Ê
- 335   2            {
- 336   3                 KeyFuncIndex = 1;
- 337   3                 LastIndex = 0;
- 338   3                 return;  
- 339   3            }       
- 340   2            
- 341   2            else if(Key_Value == KEY_ENTER) 
- 342   2            {
- 343   3       
- 344   3                 SetParam(&myparam);//±£¥Ê≤Œ ˝
- 345   3              
- 346   3                 OLED_Fill(0x00); //≥ı º«Â∆¡  
- 347   3        
- 348   3                 OLED_P8x16Str(40,0,"Save OK!");//±£¥Ê≥…π¶  
- 349   3                   
- 350   3                 delay(500);//—” ±500ms 
- 351   3                        
- 352   3                 KeyFuncIndex = 0;
- 353   3                 LastIndex = 0;
- 354   3                 return;//∑µªÿ÷˜≤Àµ•         
- 355   3            }
- 356   2        
- 357   2          }
- 358   1      }
- 359          void ChangeDistance()//∏ƒ±‰æ‡¿Î„–÷µ
- 360          {
- 361   1         unsigned char Key_Value=0;
- 362   1        
-C51 COMPILER V9.50a   MENUFUN                                                              11/19/2019 23:22:03 PAGE 7   
+ 302   4                 KeyFuncIndex = 5;
+ 303   4                 LastIndex = 0;
+ 304   4                 return;  
+ 305   4               }
+ 306   3               else//µ˜’˚æ‡¿Î≤Óµƒ„–÷µ
+ 307   3               {
+ 308   4                 KeyFuncIndex = 6;
+ 309   4                 LastIndex = 0;
+ 310   4                 return;  
+ 311   4               }
+ 312   3            }
+ 313   2           
+ 314   2         }
+ 315   1      }
+ 316          
+ 317          void DistanceMenu()
+ 318          {
+ 319   1      
+ 320   1        
+ 321   1      }
+ 322          
+ 323          void DisDiffMenu()
+ 324          {
+ 325   1      
+ 326   1      
+ 327   1      }
+ 328          void ChangePressure()//…Ë÷√ —π¡¶„–÷µ
+ 329          {
+ 330   1         unsigned char Key_Value=0;
+ 331   1        
+ 332   1         OLED_Fill(0x00); //≥ı º«Â∆¡  
+ 333   1        
+ 334   1         OLED_P8x16Str(40,0,"Setting");//…Ë÷√  
+ 335   1        
+ 336   1         OLED_P8x16Str(0,2,"Pressure:");  
+ 337   1         GetParam(&myparam);
+ 338   1         oled_show_num(80,2,myparam.PressureValue,1);
+ 339   1         
+ 340   1         OLED_P8x16Str(0,6,"ok"); 
+ 341   1         OLED_P8x16Str(100,6,"esc"); 
+ 342   1        
+ 343   1         while(1)
+ 344   1         {
+ 345   2            Key_Value = GetKey();//ªÒ»°∞¥º¸
+ 346   2            if(Key_Value == LEFT)
+ 347   2            {
+ 348   3               myparam.PressureValue+=5;
+ 349   3               if(myparam.PressureValue > 70) myparam.PressureValue = 10;     
+ 350   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
+ 351   3               OLED_P8x16Str(0,2,"Pressure:");  
+ 352   3               oled_show_num(80,2,myparam.PressureValue,1);//œ‘ æ–¬÷µ
+ 353   3                  
+ 354   3               OLED_P8x16Str(0,6,"ok"); 
+ 355   3               OLED_P8x16Str(100,6,"esc"); 
+ 356   3            } 
+ 357   2            else if(Key_Value == RIGHT) 
+ 358   2            {
+ 359   3               myparam.PressureValue-=5;
+ 360   3               if(myparam.PressureValue < 10) myparam.PressureValue = 70;     
+ 361   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
+ 362   3               OLED_P8x16Str(0,2,"Pressure:");  
+ 363   3               oled_show_num(80,2,myparam.PressureValue,1);//œ‘ æ–¬÷µ
+C51 COMPILER V9.50a   MENUFUN                                                              11/21/2019 19:48:17 PAGE 7   
 
- 363   1         OLED_Fill(0x00); //≥ı º«Â∆¡  
- 364   1        
- 365   1         OLED_P8x16Str(40,0,"Setting");//…Ë÷√  
- 366   1        
- 367   1         OLED_P8x16Str(0,2,"Distance:");  
- 368   1         GetParam(&myparam);
- 369   1         oled_show_num(80,2,myparam.DistanceValue,0);//œ‘ ææ‡¿Î„–÷µ
- 370   1         
- 371   1         OLED_P8x16Str(0,6,"ok"); 
- 372   1         OLED_P8x16Str(100,6,"esc"); 
- 373   1        
- 374   1         while(1)
- 375   1         {
- 376   2            Key_Value = GetKey();//ªÒ»°∞¥º¸
- 377   2            if(Key_Value == LEFT)
- 378   2            {
- 379   3               myparam.DistanceValue++;
- 380   3               if(myparam.DistanceValue > 12) myparam.DistanceValue = 3;      
- 381   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
- 382   3               OLED_P8x16Str(0,2,"Distance:");  
- 383   3               oled_show_num(80,2,myparam.DistanceValue,0);//œ‘ æ–¬÷µ ≤ª¥¯%∫≈
- 384   3                  
- 385   3               OLED_P8x16Str(0,6,"ok"); 
- 386   3               OLED_P8x16Str(100,6,"esc"); 
- 387   3            } 
- 388   2            else if(Key_Value == RIGHT) 
- 389   2            {
- 390   3               myparam.DistanceValue--;
- 391   3               if(myparam.DistanceValue < 1) myparam.DistanceValue = 12;      
- 392   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
- 393   3               OLED_P8x16Str(0,2,"Distance:");  
- 394   3               oled_show_num(80,2,myparam.DistanceValue,0);//œ‘ æ–¬÷µ
- 395   3               
- 396   3               OLED_P8x16Str(0,6,"ok"); 
- 397   3               OLED_P8x16Str(100,6,"esc");    
- 398   3            } 
- 399   2            else if(Key_Value == KEY_RETURN)//∑µªÿ…Ë÷√—°‘ÒΩÁ√Ê
- 400   2            {
- 401   3                 KeyFuncIndex = 1;
- 402   3                 LastIndex = 0;
- 403   3                 return;  
- 404   3            }       
- 405   2            
- 406   2            else if(Key_Value == KEY_ENTER) 
- 407   2            {
- 408   3       
- 409   3                 SetParam(&myparam);//±£¥Ê≤Œ ˝
- 410   3              
- 411   3                 OLED_Fill(0x00); //≥ı º«Â∆¡  
- 412   3        
- 413   3                 OLED_P8x16Str(40,0,"Save OK!");//±£¥Ê≥…π¶  
- 414   3                   
- 415   3                 delay(500);//—” ±500ms 
- 416   3                        
- 417   3                 KeyFuncIndex = 0;
- 418   3                 LastIndex = 0;
- 419   3                 return;//∑µªÿ÷˜≤Àµ•         
- 420   3            }
- 421   2        
- 422   2          }
- 423   1      }
- 424          
-C51 COMPILER V9.50a   MENUFUN                                                              11/19/2019 23:22:03 PAGE 8   
+ 364   3               
+ 365   3               OLED_P8x16Str(0,6,"ok"); 
+ 366   3               OLED_P8x16Str(100,6,"esc");    
+ 367   3            } 
+ 368   2            else if(Key_Value == KEY_RETURN)//∑µªÿ…Ë÷√—°‘ÒΩÁ√Ê
+ 369   2            {
+ 370   3                 KeyFuncIndex = 1;
+ 371   3                 LastIndex = 0;
+ 372   3                 return;  
+ 373   3            }       
+ 374   2            
+ 375   2            else if(Key_Value == KEY_ENTER) 
+ 376   2            {
+ 377   3       
+ 378   3                 SetParam(&myparam);//±£¥Ê≤Œ ˝
+ 379   3              
+ 380   3                 OLED_Fill(0x00); //≥ı º«Â∆¡  
+ 381   3        
+ 382   3                 OLED_P8x16Str(40,0,"Save OK!");//±£¥Ê≥…π¶  
+ 383   3                   
+ 384   3                 delay(500);//—” ±500ms 
+ 385   3                        
+ 386   3                 KeyFuncIndex = 0;
+ 387   3                 LastIndex = 0;
+ 388   3                 return;//∑µªÿ÷˜≤Àµ•         
+ 389   3            }
+ 390   2        
+ 391   2          }
+ 392   1      }
+ 393          void ChangeDistance()//∏ƒ±‰æ‡¿Î„–÷µ
+ 394          {
+ 395   1         unsigned char Key_Value=0;
+ 396   1        
+ 397   1         OLED_Fill(0x00); //≥ı º«Â∆¡  
+ 398   1        
+ 399   1         OLED_P8x16Str(40,0,"Setting");//…Ë÷√  
+ 400   1        
+ 401   1         OLED_P8x16Str(0,2,"Distance:");  
+ 402   1         GetParam(&myparam);
+ 403   1         oled_show_num(80,2,myparam.DistanceValue,0);//œ‘ ææ‡¿Î„–÷µ
+ 404   1         
+ 405   1         OLED_P8x16Str(0,6,"ok"); 
+ 406   1         OLED_P8x16Str(100,6,"esc"); 
+ 407   1        
+ 408   1         while(1)
+ 409   1         {
+ 410   2            Key_Value = GetKey();//ªÒ»°∞¥º¸
+ 411   2            if(Key_Value == LEFT)
+ 412   2            {
+ 413   3               myparam.DistanceValue++;
+ 414   3               if(myparam.DistanceValue > 12) myparam.DistanceValue = 3;      
+ 415   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
+ 416   3               OLED_P8x16Str(0,2,"Distance:");  
+ 417   3               oled_show_num(80,2,myparam.DistanceValue,0);//œ‘ æ–¬÷µ ≤ª¥¯%∫≈
+ 418   3                  
+ 419   3               OLED_P8x16Str(0,6,"ok"); 
+ 420   3               OLED_P8x16Str(100,6,"esc"); 
+ 421   3            } 
+ 422   2            else if(Key_Value == RIGHT) 
+ 423   2            {
+ 424   3               myparam.DistanceValue--;
+ 425   3               if(myparam.DistanceValue < 1) myparam.DistanceValue = 12;      
+C51 COMPILER V9.50a   MENUFUN                                                              11/21/2019 19:48:17 PAGE 8   
 
- 425          void changeDisDiff()//…Ë÷√æ‡¿Î≤Óµƒ„–÷µ
- 426          {
- 427   1         unsigned char Key_Value=0;
- 428   1        
- 429   1         OLED_Fill(0x00); //≥ı º«Â∆¡  
- 430   1        
- 431   1         OLED_P8x16Str(40,0,"Setting");//…Ë÷√  
- 432   1         OLED_P8x16Str(0,2,"DistDiff:");  
- 433   1         GetParam(&myparam);
- 434   1         oled_show_num(80,2,myparam.DistanceDiffLimit,0);//œ‘ ææ‡¿Î≤Óµƒ„–÷µ
- 435   1         
- 436   1         OLED_P8x16Str(0,6,"ok"); 
- 437   1         OLED_P8x16Str(100,6,"esc"); 
- 438   1        
- 439   1         while(1)
- 440   1         {
- 441   2            Key_Value = GetKey();//ªÒ»°∞¥º¸
- 442   2            if(Key_Value == LEFT)
- 443   2            {
- 444   3               myparam.DistanceDiffLimit+=10;
- 445   3               if(myparam.DistanceDiffLimit > 240) myparam.DistanceDiffLimit = 0;     
- 446   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
- 447   3               OLED_P8x16Str(0,2,"Differ:");  
- 448   3               oled_show_num(80,2,myparam.DistanceDiffLimit,0);//œ‘ æ–¬÷µ ≤ª¥¯%∫≈
- 449   3                  
- 450   3               OLED_P8x16Str(0,6,"ok"); 
- 451   3               OLED_P8x16Str(100,6,"esc"); 
- 452   3            } 
- 453   2            else if(Key_Value == RIGHT) 
- 454   2            {
- 455   3               myparam.DistanceDiffLimit-=10;
- 456   3               if(myparam.DistanceDiffLimit < 10) myparam.DistanceDiffLimit = 240;      
- 457   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
- 458   3               OLED_P8x16Str(0,2,"Differ:");  
- 459   3               oled_show_num(80,2,myparam.DistanceDiffLimit,0);//œ‘ æ–¬÷µ
- 460   3               
- 461   3               OLED_P8x16Str(0,6,"ok"); 
- 462   3               OLED_P8x16Str(100,6,"esc");    
- 463   3            } 
- 464   2            else if(Key_Value == KEY_RETURN)//∑µªÿ…Ë÷√—°‘ÒΩÁ√Ê
- 465   2            {
- 466   3                 KeyFuncIndex = 1;
- 467   3                 LastIndex = 0;
- 468   3                 return;  
- 469   3            }       
- 470   2            
- 471   2            else if(Key_Value == KEY_ENTER) 
- 472   2            {
- 473   3       
- 474   3                 SetParam(&myparam);//±£¥Ê≤Œ ˝
- 475   3              
- 476   3                 OLED_Fill(0x00); //≥ı º«Â∆¡  
- 477   3        
- 478   3                 OLED_P8x16Str(40,0,"Save OK!");//±£¥Ê≥…π¶  
- 479   3                   
- 480   3                 delay(500);//—” ±500ms 
- 481   3                        
- 482   3                 KeyFuncIndex = 0;
- 483   3                 LastIndex = 0;
- 484   3                 return;//∑µªÿ÷˜≤Àµ•         
- 485   3            }
- 486   2        
-C51 COMPILER V9.50a   MENUFUN                                                              11/19/2019 23:22:03 PAGE 9   
+ 426   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
+ 427   3               OLED_P8x16Str(0,2,"Distance:");  
+ 428   3               oled_show_num(80,2,myparam.DistanceValue,0);//œ‘ æ–¬÷µ
+ 429   3               
+ 430   3               OLED_P8x16Str(0,6,"ok"); 
+ 431   3               OLED_P8x16Str(100,6,"esc");    
+ 432   3            } 
+ 433   2            else if(Key_Value == KEY_RETURN)//∑µªÿ…Ë÷√—°‘ÒΩÁ√Ê
+ 434   2            {
+ 435   3                 KeyFuncIndex = 1;
+ 436   3                 LastIndex = 0;
+ 437   3                 return;  
+ 438   3            }       
+ 439   2            
+ 440   2            else if(Key_Value == KEY_ENTER) 
+ 441   2            {
+ 442   3       
+ 443   3                 SetParam(&myparam);//±£¥Ê≤Œ ˝
+ 444   3              
+ 445   3                 OLED_Fill(0x00); //≥ı º«Â∆¡  
+ 446   3        
+ 447   3                 OLED_P8x16Str(40,0,"Save OK!");//±£¥Ê≥…π¶  
+ 448   3                   
+ 449   3                 delay(500);//—” ±500ms 
+ 450   3                        
+ 451   3                 KeyFuncIndex = 0;
+ 452   3                 LastIndex = 0;
+ 453   3                 return;//∑µªÿ÷˜≤Àµ•         
+ 454   3            }
+ 455   2        
+ 456   2          }
+ 457   1      }
+ 458          
+ 459          void changeDisDiff()//…Ë÷√æ‡¿Î≤Óµƒ„–÷µ
+ 460          {
+ 461   1         unsigned char Key_Value=0;
+ 462   1        
+ 463   1         OLED_Fill(0x00); //≥ı º«Â∆¡  
+ 464   1        
+ 465   1         OLED_P8x16Str(40,0,"Setting");//…Ë÷√  
+ 466   1         OLED_P8x16Str(0,2,"DistDiff:");  
+ 467   1         GetParam(&myparam);
+ 468   1         oled_show_num(80,2,myparam.DistanceDiffLimit,0);//œ‘ ææ‡¿Î≤Óµƒ„–÷µ
+ 469   1         
+ 470   1         OLED_P8x16Str(0,6,"ok"); 
+ 471   1         OLED_P8x16Str(100,6,"esc"); 
+ 472   1        
+ 473   1         while(1)
+ 474   1         {
+ 475   2            Key_Value = GetKey();//ªÒ»°∞¥º¸
+ 476   2            if(Key_Value == LEFT)
+ 477   2            {
+ 478   3               myparam.DistanceDiffLimit+=10;
+ 479   3               if(myparam.DistanceDiffLimit > 240) myparam.DistanceDiffLimit = 0;     
+ 480   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
+ 481   3               OLED_P8x16Str(0,2,"Differ:");  
+ 482   3               oled_show_num(80,2,myparam.DistanceDiffLimit,0);//œ‘ æ–¬÷µ ≤ª¥¯%∫≈
+ 483   3                  
+ 484   3               OLED_P8x16Str(0,6,"ok"); 
+ 485   3               OLED_P8x16Str(100,6,"esc"); 
+ 486   3            } 
+ 487   2            else if(Key_Value == RIGHT) 
+C51 COMPILER V9.50a   MENUFUN                                                              11/21/2019 19:48:17 PAGE 9   
 
- 487   2          }
- 488   1      }
- 489          
+ 488   2            {
+ 489   3               myparam.DistanceDiffLimit-=10;
+ 490   3               if(myparam.DistanceDiffLimit < 10) myparam.DistanceDiffLimit = 240;      
+ 491   3               OLED_ClearLine(2);//«ÂµÙæ…÷µ
+ 492   3               OLED_P8x16Str(0,2,"Differ:");  
+ 493   3               oled_show_num(80,2,myparam.DistanceDiffLimit,0);//œ‘ æ–¬÷µ
+ 494   3               
+ 495   3               OLED_P8x16Str(0,6,"ok"); 
+ 496   3               OLED_P8x16Str(100,6,"esc");    
+ 497   3            } 
+ 498   2            else if(Key_Value == KEY_RETURN)//∑µªÿ…Ë÷√—°‘ÒΩÁ√Ê
+ 499   2            {
+ 500   3                 KeyFuncIndex = 1;
+ 501   3                 LastIndex = 0;
+ 502   3                 return;  
+ 503   3            }       
+ 504   2            
+ 505   2            else if(Key_Value == KEY_ENTER) 
+ 506   2            {
+ 507   3       
+ 508   3                 SetParam(&myparam);//±£¥Ê≤Œ ˝
+ 509   3              
+ 510   3                 OLED_Fill(0x00); //≥ı º«Â∆¡  
+ 511   3        
+ 512   3                 OLED_P8x16Str(40,0,"Save OK!");//±£¥Ê≥…π¶  
+ 513   3                   
+ 514   3                 delay(500);//—” ±500ms 
+ 515   3                        
+ 516   3                 KeyFuncIndex = 0;
+ 517   3                 LastIndex = 0;
+ 518   3                 return;//∑µªÿ÷˜≤Àµ•         
+ 519   3            }
+ 520   2        
+ 521   2          }
+ 522   1      }
+ 523          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1838    ----
-   CONSTANT SIZE    =    143    ----
+   CODE SIZE        =   1937    ----
+   CONSTANT SIZE    =    155    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      3      11
+   DATA SIZE        =      3      14
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
